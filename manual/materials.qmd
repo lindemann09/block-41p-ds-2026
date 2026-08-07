@@ -1,0 +1,22 @@
+## Literature
+
+The course is primarily based on the text book:
+
+* Farrell, S., & Lewandowsky, S. (2018). *Computational modeling of cognition and behavior.* Cambridge University Press.
+
+Note: Book chapters and articles are only accessible from the university campus. To access these materials from home, you need to set up a
+[VPN connection (on-campus simulation)](https://www.eur.nl/en/library/using-library/access-online-collection).
+
+
+**References**
+
+::: {#refs}
+:::
+
+
+## R Introduction
+
+This [R mini tutorial](r_basics/index.html) is a short introduction to the programming language R. It is designed for students of the course *Data Science* and provides a basic understanding of R programming.
+
+## Additional Material
+

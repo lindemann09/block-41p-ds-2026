@@ -1,0 +1,37 @@
+```{r}
+#| echo: false
+source("_common.R")
+```
+
+
+# Overview {-}
+
+This mini tutorial is an introduction in basic  _R_ skills for psychologists of the course *Data Science*.  Students will get a basic understanding of the programming language R.
+
+_R_ is a free software environment for statistical computing and data visualization that has become in the last couple of years the de-facto-standard tool for advanced statistics and reproducible research in psychology and social sciences.
+
+**Learning Objectives**
+
+At the end of the course the student will be able to develop scripts in the programming language R. The acquired data science skills comprise
+
+* basics of programming in R
+* reading data files in different formats
+
+
+**Manual**
+
+This manual guides you though the _R_ course and explains all concepts you need to know and points to relevant online resources.
+
+A __PDF__ version of this tutorial can be downloaded, if you click on the little PDF symbol behind the title on the top-left.
+
+\vfill
+
+---
+
+This mini tutorial is written by [Oliver Lindemann](http://cognitive-psychology.eu/lindemann), Erasmus University Rotterdam, using [Quarto](https://quarto.org/). It's __free to use__ and licensed under the [Creative Commons BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) License. This manual is influenced by the two tutorials [Advanced R](https://r4ds.had.co.nz/index.html) by Hadley Wickham  and [Data Skills for Reproducible Science](https://psyteachr.github.io/msc-data-skills/) of the University of Glasgow.
+
+```{r out.width = "200px", fig.align = 'center', echo=FALSE}
+knitr::include_graphics('images/by-nc-sa.eu_.png')
+```
+
+\newpage

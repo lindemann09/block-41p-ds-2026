@@ -1,0 +1,92 @@
+\usepackage{booktabs}
+\usepackage{amsthm}
+\usepackage{float}
+
+\makeatletter
+\def\thm@space@setup{%
+  \thm@preskip=8pt plus 2pt minus 4pt
+  \thm@postskip=\thm@preskip
+}
+\makeatother
+
+
+% for highlighting with gray background
+\makeatletter
+
+\newenvironment{kframe}{%
+\medskip{}
+\setlength{\fboxsep}{.8em}
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+
+\makeatother
+
+\newenvironment{rmdblock}[1]
+  {
+  \begin{itemize}
+  \renewcommand{\labelitemi}{
+    \raisebox{-.7\height}[0pt][0pt]{
+      {\setkeys{Gin}{width=3em,keepaspectratio}\includegraphics{images/#1}}
+    }
+  }
+  \setlength{\fboxsep}{1em}
+  \begin{kframe}
+  \item
+  }
+  {
+  \end{kframe}
+  \end{itemize}
+  }
+
+
+%\renewcommand{\partname}{Week }
+
+% highlighting block
+\newenvironment{geek}
+    {\begin{rmdblock}{geek}}
+    {\end{rmdblock}}
+
+\newenvironment{hint}
+  {\begin{rmdblock}{hint2}}
+  {\end{rmdblock}}
+
+\newenvironment{important}
+    {\begin{rmdblock}{hint}}
+    {\end{rmdblock}}
+
+\newenvironment{simple}
+        {}
+        {}
+
+\newenvironment{myexercise}
+    {\begin{rmdblock}{exercise_green}}
+    {\end{rmdblock}}
+
+
+\newenvironment{webexsolution}[1]
+    {\par\tiny\textbf{#1}}
+    {\par}
+
+% avoid direct call of environment in Rmarkdown, because it inhibits the knitr to
+% process R code
+\newcommand{\webexhide}[1]{\begin{webexsolution}{#1}}
+\newcommand{\webexunhide}{\end{webexsolution}}
+
+
+\usepackage{fancyhdr}
+%\setlength{\headheight}{15.2pt}
+\pagestyle{fancy}
+\fancyhead[L]{\textit{Data Processing \& Analysis in R}}
+%\fancyfoot[L]{\includegraphics[height=3\baselineskip]{images/R-course-logo}}

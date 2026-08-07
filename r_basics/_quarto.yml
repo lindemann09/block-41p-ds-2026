@@ -1,0 +1,69 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "R Basics for Data Science"
+  reader-mode: false
+  page-navigation: true
+  downloads: pdf
+  #page-footer:
+    #right:
+    #left:
+  #cover-image: cover.jpg
+  #site-url:
+  #repo-url:
+  # repo-branch: main
+  chapters:
+    - index.qmd
+    - 01-introduction.qmd
+    - 03-gettinghelp.qmd
+
+    - part: "Basics"
+      chapters:
+        - 11-Getting_started.qmd
+        - 13-basics.qmd
+
+    - part: "Data Structures"
+      chapters:
+        - 21-Vectors.qmd
+        - 22-Lists.qmd
+        - 23-dataframes.qmd
+        - 26-packages.qmd
+        - 28-reading_data_files.qmd
+
+  appendices:
+    - 91-Appendix.qmd
+    - 92-Appendix.qmd
+    - 93-Appendix.qmd
+
+
+format:
+  html:
+    theme:
+      - cosmo
+    css:
+      - include/webex.css
+      - include/style.css
+    include-after-body:
+      - include/webex.js
+
+    code-background: true
+    code-copy: true
+    #code-overflow: wrap
+    toc: false
+    #toc-depth: 2
+    toc-location: body
+    toc-expand: true
+    author-meta: "Oliver Lindemann"
+  pdf:
+    documentclass: scrreprt
+    pdf-engine: lualatex
+    keep-tex: false
+    toc_depth: 2
+    include-in-header: include/preamble.tex
+
+execute:
+  freeze: true
+
+editor: source

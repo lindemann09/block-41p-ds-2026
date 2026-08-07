@@ -1,0 +1,89 @@
+```{r}
+#| echo: false
+source("_common.R")
+```
+
+# Packages {#sec-packages}
+
+When you install _R_  you will have access to a range of functions including basic options for data wrangling and statistical analyses. The functions that are included in the default installation are typically referred to as **Base _R_** and there is a useful [cheat sheet](#sec-cheatsheets) that shows many Base _R_  functions here.  We've been using a couple functions from base _R_, such as `seq()` or `rnorm()`-
+
+However, the amazing power of _R_  is that it is extendable. That is, if a command or method doesn't exist anyone can create a so-called *package* that contains one or multiple functions (and/or data) to perform new tasks. The large active _R_ user community is always creating new packages to expand _R_'s capabilities. You may find it useful to think of Base _R_  as the default apps that come on your phone and packages as additional apps that you need to download separately.
+
+In _R_ , the fundamental unit of shareable code is a package. A package bundles together code, data, documentation, and tests, and is easy to share with others. They increase the power of _R_  by improving existing base _R_  functionalities, or by adding new ones.
+
+
+## Installing a package
+
+The traditional place to get _R_ packages is from [*CRAN*, the Comprehensive R Archive Network](https://cran.r-project.org/), which is where you have  downloaded _R_.
+
+However, you don’t need to go to *CRAN*'s website to install packages. It's much simpler and can be accomplished within the console using the command `install.packages("package-name-in-quotes")`. _R_ searches online on the *CRAN* servers for a packages with that name and downloads and installs it locally. This works, of course, only if you have an internet connection.  Let's install a small, fun package `praise`. You need to use quotes around the package name:
+
+```{r eval=FALSE}
+install.packages("praise")
+```
+::: {.myexercise}
+The next chapters will make use of two packages that help us to important data in _R_. This packages are called `readr` and  `readxl`. Please install these two packages.
+:::
+
+`r hide()`
+```{r, eval = FALSE}
+install.packages("readr")
+install.packages("readxl")
+```
+`r unhide()`
+
+::: {.geek}
+If you want to install multiple packages at once, you have to use a vector of the package names you want to install as argument, e.g., `install.packages( c("package-a", "package-b") )`.
+:::
+
+## Using a package
+
+So far, we've just installed packages. That is, the packages are now available on the local computer. Before we can use the new functionality, we need to tell _R_  to activate the package for this session, or better said, to load the library to memory. This will be done by the function `library()`. For example, to use the `praise`-package we call first:
+
+```{r eval=TRUE}
+library("praise")
+```
+
+Now that the `praise` package is loaded, you can use the function in that package. The new function is called `praise()` and returns a praise to make you feel better.
+
+```{r eval=TRUE}
+praise()
+```
+
+*(As you see, you can do really useful things with _R_ `;-)`)*
+
+**But what’s the difference between a package and a library?**
+
+Sometimes there is a confusion between a package and a library. Please don't get confused. You can find many people calling “libraries” to packages (like me, sometimes). To be precise, a library is a the collection of functions that we use in _R_  and that will be loaded into memory with the `library()`-command. A package is the bundle of software that you have to install to get the library. A package can contain more than just the library, for instance, documentation, example scripts and data.
+
+
+### The `::` operator {-}
+
+Once you have load the package with `library()` _R_ knows all functions of that package and you can run the function just by calling it's name (as you know it).
+
+If you call a function, it's also possible to mention explicitly the package from which the function stems. This is done with the `::` operator that separates the package and function name: `package-name::function-name()`. For example, calling the function `praise()` from the package `praise` would look like this:
+
+```{r eval=FALSE}
+praise::praise()
+```
+
+**Why should I use the `::` syntax?**
+
+You don't have to use `::` and I guess that you will hardly need it for you own analyses. However, there are some reasons why you should know that this syntax exists:
+
+1. In manuals and documentations people often use this syntax to make clear from which package a particular function stems and which package needs to be installed to make use of this function.
+2. If you use the `::` operator, you don't have to call `library()`. That is, if you need a function just once, it might be convenient to save a line of code.
+3. It is possible that you use two packages that introduce the same name for different functions. This causes a naming conflict and one package masks the function of the other package. To get access to both functions in the different packages, you need to use the `::` operator.
+
+
+::: {.geek}
+Mask conflicts occur for instance in the `tidyverse` package collection, that we'll use next week. Mask conflicts will be depicted as warnings while loading (importing) a library.
+:::
+
+## Getting help for packages
+
+If you want to know more about a package, you can use _R_'s built-in help function: `help(package="package-name")`.
+
+::: {.myexercise}
+Try to access the documentation of the function `read_excel` of the newly installed `readxl`-package.
+:::

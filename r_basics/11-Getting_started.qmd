@@ -1,0 +1,39 @@
+# Getting started {#sec-gettingstarted}
+
+
+To get started to working with _R_ on your own PC or laptop, you have to install _R_ and RStudio. Details about how to install it on your computer can be found below and in one of the instruction videos.
+
+
+##  Installing _R_ and _RStudio_ on your PC
+
+::: {.myexercise}
+**Install _R_**
+
+  Depending on the operating system (OS), download the latest release of [R for Windows](https://cran.rstudio.com/bin/windows/base/) or R for [MacOSX](https://www.macobserver.com/tips/how-to/download-install-r-rstudio-mac/) or [Linux](https://cran.rstudio.com/) and install it. If you use Linux, you can install the package `r-base` via your package manager.
+:::
+
+::: {.myexercise}
+**Download _RStudio_ and install it.**
+
+  Use the correct installer for your operation system from [RStudio homepage](https://rstudio.com/products/rstudio/download/#download).
+:::
+
+
+If you face problems with the installation you might find [Step-by-Step Guide for Installing R and R Studio](https://techvidvan.com/tutorials/install-r/) useful. However, there are also several other of tutorials onli{-}ne.
+
+<!-- IDEA errors, warning, debugging, types of error, checking functions -->
+
+
+## Creating a Project
+
+To get started with your own programming in _RStudio_ and with this course you need to create a project that you use for all your exercises during this course.
+
+::: {.myexercise}
+Open _RStudio_ and click in the menu `File - New Project`, `New Directory - New Project`, select a directory name (e.g. 'R-practical') and select a subdirectory, where your want to save the project. Click `Create Project`.
+:::
+
+__Now, you are ready to started working with _R_...__
+
+Even though you can program and edit _R_ files without making a _RStudio_ project, I __strongly recommend__ to work always within a project. That is, the first you should do, when opening _RStudio_ is the check, if you are in the right project or make new project, if you start a new data analysis. By the way, _RStudio__ automatically opens the last used project.
+
+Why should I use projects? When working with _R_, you are running your program code from a certain __working directory__ (You can change the working directory [like this](https://www.youtube.com/watch?v=LNw6hzGgyxM).). From this directory you access all your data files and  _R_ scripts. It's therefore crucial that you have files and data in the correct folder structure and that you are in the right directory. A project saves the last working directory and the state of your previous work. That is very handy.

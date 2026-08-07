@@ -1,0 +1,101 @@
+```{r}
+#| echo: false
+source("_common.R")
+```
+
+# Lists {#sec-lists}
+
+Lists are like atomic vectors because they group data into a one-dimensional set. However, lists do not group together individual values; lists group together _R_  objects, such as atomic vectors and other lists. For example, you can make a list that contains a numeric vector of length 31 in its first element, a character vector of length 1 in its second element, and a new list of length 3 in its third element. To do this, use the `list()` function.
+
+`list()` creates a list the same way `c()` creates a vector. Separate each element in the list with a comma:
+
+```{r}
+a_list <- list(100:111, "Erasmus", c(FALSE, TRUE, FALSE))
+a_list
+```
+
+The double-bracketed indexes, `[[..]]`, tell you which element of the list is being displayed. The single-bracket indexes, `[]`, tell you which subelement of an element is being displayed. For example, `100` is the first subelement of the first element in the list. `"Erasmus"` is the first sub-element of the second element. This two-system notation arises because each element of a list can be _any_ _R_-object, including a new vector (or list) with its own indexes.
+
+As you can imagine, the structure of lists can become quite complicated, but this flexibility makes lists a useful all-purpose storage tool in _R_: you can group together anything with a list.
+
+
+## Subsetting lists
+
+If you want to access the third element in the list you have to call:
+
+```{r eval=TRUE}
+a_list[[3]]
+```
+In our example, this is a vector with 3 logicals.
+
+Please keep in mind that **you have to use the double-bracketed indexes `[[..]]`, if you want to access the content of a specific object in a list**. Single-brackets, e.g. `a_list[3]`, don't raise an error, but returns something slightly different. This behaviour is often confusing for beginners.
+
+
+::: {.geek}
+This actually very consistent. `a_list[3]` returns a list with on object, because `a_list[c(3,2)]` would return also a list (with two objects) and because subsetting atomic vectors with single brackets also return vectors. This check this out:
+
+`typeof(a_list[2])` and `typeof(a_list[[2]])`
+:::
+
+## Named lists {#sec-namedlists}
+
+This subsetting is double-brackets not very intuitive. At least in my view. I try to avoid it always and prefer to use names in lists. List produce readable code, if you use `name` attribute and if assign useful names to the elements in the list. You assign names to lists, like you did it with vectors in @sec-namedvectors. In our example, it would be:
+
+```{r eval=FALSE}
+b_list <- list(100:111, "Erasmus", c(FALSE, TRUE, FALSE))
+names(b_list) <- c("my_sequence", "university", "x")
+```
+
+But this can be done also in one line of code and is even easier and even more readable, right?
+
+```{r}
+b_list <- list(my_sequence=100:111, university="Erasmus", x=c(FALSE, TRUE, FALSE))
+b_list
+```
+
+## The `$` operator {#sec-listsdollar}
+
+If you want to access a specific element you can call it by it's name using the `$` operator. See want you get, if you type:
+
+```{r, eval = FALSE}
+b_list$my_sequence
+b_list$university
+```
+
+You can also add a new element to list simply by using the `$` operator followed by a new name
+
+```{r eval=TRUE}
+b_list$my_new_element <- 15.6
+```
+
+::: {.myexercise}
+Have a look in RStudio in the Environment viewer and see how `a_list` and `b_list` are displayed.
+
+* Click on the arrow to get more information.
+* Double click the name of one list.
+:::
+`r hide("What should I see?")`
+
+1. You see details of the three objects/elements of the list in the environment tab.
+2. Details are displayed in a separate panel.
+
+
+`r unhide()`
+
+
+::: {.myexercise}
+Make a list called `lst` with three objects
+
+* a vector called `subjects` containing the names John, Maria and Linda
+* a vector called `body_len` containing the length in meter 1.92, 1.71 and 1.63
+* a vector called `body_cm` containing the calculated length in centimeter
+:::
+
+`r hide()`
+```{r eval=TRUE}
+lst <- list(subjects=c("John", "Maria", "Linda"),
+            body_len=c(1.92, 1.71, 1.63))
+lst$body_cm = lst$body_len * 100
+print(lst)
+```
+`r unhide()`

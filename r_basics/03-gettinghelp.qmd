@@ -1,0 +1,38 @@
+```{r}
+#| echo: false
+source("_common.R")
+```
+
+\newpage
+
+
+# Finding Help {#sec-findinghelp}
+
+Learning to programming means trying things out, change stuff in the code and see what happens. Unfortunately, try-and-error is the only way to became a good data analyst or programmer.
+
+Please note, you will face **very often** error messages! Don't get scared,  **read the error messages carefully** and try to understand what the cause of the problem is.
+
+There is another type of mistake: Sometimes _R_ commands or scripts do not show an error message, but if you look carefully you notice that the _R_ doesn't  do what you want or reveals very strange and impossible results. Checks therefore the effects of your steps always very carefully. This is can be sometimes a trick situation. Learning to find the mistake (i.e. the bug) in your code can become very hard. That is, finding and solving this problems in the script (called "debugging") is a key skill that you need to develop throughout this course.
+
+
+1. If you’re struggling how a function works, remember the `?function` command and use this built-in help documentation of _R_  and RStudio (see @sec-builtinhelp).
+
+2. Look at the [suggested readings and online learning resources](#sec-readings) in the @sec-readings.
+
+3. Note, the internet is your best friend while learning to programming (and afterwards).
+
+    * Sometimes to helps to find pieces of code of other users online to "*copy & paste*"  and "*change & see what happens*". For this you can use in a normal web search engine (e.g.  [DuckDuckGo](https://duckduckgo.com/) or [Google](http://www.google.com/en) or other).
+
+    * If you encounter an error message and you do not understand the reasons for this error, it is very help copy & paste the error message search for it online. You are probably not the first one who had this problem
+
+    * It is also highly recommanded use question-and-answer-sites for programmers. The most prominent examples is here [stackoverflow.com](https://stackoverflow.com/questions/tagged/r). Just enter `[r] ` followed by your question and see, if other user have already asked a similar Question.
+
+4.  [Cheat sheets](#sec-cheatsheets) are nice overviews of _R_  functions and helpful, if you can't remember correctly how to use the functions. They are however not self-explaining.
+
+
+
+::: {.important}
+### Difficulties with the exercises and assignments {-}
+
+If you are having difficulties with the exercises or assignments and you can not solve the problem yourself, ask your question during the **tutorial sessions**. The idea of the tutorial sessions is to provide  hands-on support you need to do the exercises and answer all your questions. Make use of this sessions.
+:::

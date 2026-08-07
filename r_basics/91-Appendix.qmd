@@ -1,0 +1,30 @@
+\newpage
+
+# Suggested Readings {#sec-readings}
+
+The following free books and online resources provide further introductions to data science skills with _R_.
+
+* [R for Data Science](https://r4ds.had.co.nz/) by Grolemund & Wickham
+* [Hands-On Programming with R](https://rstudio-education.github.io/hopr/) by G. Grolemund
+* [Advanced R](https://adv-r.hadley.nz/) by Hadley Wickham
+* [The Tidyverse Cookbook](https://rstudio-education.github.io/tidyverse-cookbook) by G. Grolemund
+* [Data Skills for Reproducible Science](https://psyteachr.github.io/reprores-v3/index.html) from the University Glasgow
+
+Further resources
+
+* [R codebook](http://www.cookbook-r.com/)
+* [Introduction to Open Data Science](http://ohi-science.org/data-science-training/)
+* [Exploratory Data Analysis with R](https://bookdown.org/rdpeng/exdata/)
+* [The Art of Data Science](https://bookdown.org/rdpeng/artofdatascience/)
+* [Data Visualization: A practical introduction](http://socviz.co/)
+
+
+## Cheat sheets {#sec-cheatsheets}
+
+* [RStudio IDE](https://raw.githubusercontent.com/rstudio/cheatsheets/main/rstudio-ide.pdf)
+* [Base R](https://raw.githubusercontent.com/rstudio/cheatsheets/master/base-r.pdf)
+* [Data import](https://raw.githubusercontent.com/rstudio/cheatsheets/main/data-import.pdf) with `readr`
+* [Data transformation](https://raw.githubusercontent.com/rstudio/cheatsheets/main/data-transformation.pdf) with `dplyr & tidyr`
+* [Data tidying](https://raw.githubusercontent.com/rstudio/cheatsheets/master/tidyr.pdf) with `tidyr`
+* [Data visualization](https://raw.githubusercontent.com/rstudio/cheatsheets/main/data-visualization.pdf) with `ggplot`
+* [and more..](https://rstudio.com/resources/cheatsheets/)

@@ -1,0 +1,277 @@
+```{r}
+#| echo: false
+source("_common.R")
+```
+
+# Atomic Vectors {#sec-vectors}
+
+A dataset consists typically not only of a single number or a single data point. We need to be able to deal with collections of data points or datasets. _R_ knows different types of objects that store datasets.
+
+We’ll start with the most basics type of data structure in _R_ , which is an **atomic vector**. A vector is merely a list of data points. They are very simple and they do show up everywhere.  If you look closely enough, you’ll see later that almost all data structures in _R_ are built from atomic vectors.
+
+You can make an atomic vector by grouping some values of data together with the command `c()` (which stands for concatenate).
+
+
+```{r}
+vec <- c(1,2,3,4,5,6)
+vec
+
+vector_of_logicals  <- c(FALSE, TRUE, TRUE, FALSE)
+vector_of_logicals
+
+days_of_week <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+                "Saturday", "Sunday")
+days_of_week
+```
+
+You can make vectors of any type of data, but **one atomic vector comprises only data of one type**! That is, each atomic vector stores its values as a one-dimensional vector, and each atomic vector can only store one data type. If you mix numbers (_integer_, _doubles_), _logicals_, and text (_chanraters_), _R_ converts them to one data type. This should be always avoided, because it will cause problems later once you want to calculate with the data.
+
+```{r}
+x <- c("a", 3, "c", 6.5)
+x
+```
+
+As you see, all elements have been converted to character. That's bad. If you want to mix different data types in one collection, you have to use `list()` as described in @sec-lists.
+
+### Concatenating two vectors {-}
+
+You can use the ``c()``-command also to concatenate two vectors:
+
+```{r}
+x <- c(1,2,3,4,5,6)
+y <- c(20,30,40)
+z <- c(x, y)
+z
+```
+
+### Vector length {-}
+
+The command ``length`` returns the number of elements in an atomic vector.
+
+```{r}
+length(days_of_week)
+```
+
+
+## Number sequences
+
+You can generate a simple ascending or descending sequence of integer numbers like this:
+
+```{r eval=TRUE}
+x <- 1:100   # ascending sequence
+x
+y <- 49:-50  # descending sequence
+y
+```
+
+What does the numbers in brackets in the output mean? _R_ indicates before each output line the position of the next printed element in the vector (e.g. `[19]`). That's why the console output of vectors always start with `## [1]`.
+
+
+### Sequence generating functions
+
+_R_ come with a lot of methods that generate sequence. For instance, for instance the function `seq()` has be already used in the previous assignment. Let's have a look at some further features of the function. You can also produce floating points with `seq()`:
+
+```{r eval=TRUE}
+seq(10, 12, by=.2)
+```
+If you want to make a vector of a particular length (with equalled spaced numbers) you can you the optional argument  `length`. For example,
+
+```{r eval=TRUE}
+seq(0,1, length=12) # 12 numbers between 0  and 1
+```
+
+**Random numbers**
+
+Random numbers sequences are very useful to illustrate probabilistic phenomena in statistics and are required in psychology for mathematical modelling and simulations. _R_ can generate random numbers from different probability functions.
+
+Drawing random numbers from a normal distribution has already been discussed in @sec-examplernorm. The function `runif()` is used draw random numbers from a uniform distribution:
+
+```{r eval=TRUE}
+
+runif(10)                     # 10 random numbers between 0 and 1
+runif(10, min= 10, max = 99)  # 10 random numbers between 10 and 99
+```
+
+::: {.geek}
+More information about random number generation and the probability distributions that are implemented in base _R_ can be found by calling `?RNG` and `?distributions`.
+:::
+
+
+## Manipulating vectors
+
+If you apply an operation on a vector, _R_ applies it to each element. You have seen already some examples.
+
+`r hide("Some examples")`
+```{r, eval = TRUE}
+v <- c(1,2,3,4,5,6)
+v + 100
+v**3     # to the power of 3
+sqrt(v)  # square root
+```
+`r unhide()`
+
+Please note, for functions it's not always like this. Some functions do indeed apply an operation to each element and return as result a vector like `sqrt()`. However, not all functions work element-wise. Some functions do a calculation with all number are return for instance a single value. Good examples for this are:
+
+```{r}
+v <- 200:3000
+mean(v)  # calculate the mean of the numbers 200 to 300
+max(v)    # the largest number
+```
+
+::: {.myexercise}
+What is returned, if you compare vectors with a single number?
+:::
+`r hide()`
+Examples:
+```{r, eval = TRUE}
+v <- 1:10
+v <= 3   # smaller or equal to three
+v == 5
+v <- c(1, 4, 6, 9, 2, 3, 5)
+v < 5
+```
+**Answer**: _R_  returns a vector of logicals that results for the comparison the number with each element.
+`r unhide()`
+
+
+### Basic operations & comparisons with two vectors
+
+Basic operations between two vectors are useful only between vectors of the same length. In this case, _R_  combines or compares each element of the first with each element of the second vector:
+
+```{r eval=TRUE}
+a <- c(5, 8, 2, 4, 1, 10, 7, 3, 9, 6)
+b <- 1:10
+a + b    # c(5+1, 8+2, 2+3, 4+4, ..)
+a * b    # c(5/1, 8/2, 2/3, 4/4, ..)
+a > b    # c(5>1, 8>2, 2>3, 4>4, ..)
+```
+
+
+**Avoid to combine two vectors of different length.** The result is not very intuitive and typically not useful. If that happens, you get a warning by _R_.
+
+::: {.geek}
+If two vectors are not of the same length, _R_ loops over the shorter vector. Check out what happens here:
+
+`c(2, 1000) + c(100, 101, 103)`
+:::
+
+
+<!-- HACK assignment debug operation with vectors of different length -->
+
+Other object types that are commonly used is _R_ are **arrays** and **matrices**. Matrices store values in a two-dimensional array, that is, you have rows and columns. These data types are crucial for those who use _R_ for linear algebra or want to handle very large dataset. _R_ furthermore knows n-dimensional arrays. However, in this course will not further discuss this data types.
+
+
+
+## Subsetting Vectors {#sec-subsetting}
+
+Often you want to access only subsets, that is, parts or single elements of a vector. Let’s explore the different types of subsetting with a simple vector of floating point numbers `x`.
+
+```{r eval=TRUE}
+x <- c(2.1, 4.2, 3.3, 5.4)
+```
+
+Please note, in this example vector the number after the decimal point represents the original position in the vector. That might make it easy to understand the following examples.
+
+If you want to have only certain elements of a vector you have the use the operator `[]`. The `[]` operator can be called
+
+* with positive integers
+* with negative integers
+* with logical vectors
+* with nothing
+
+### Positive integers
+
+Positive integers return elements at the specified positions:
+
+```{r eval=TRUE}
+x[2]            # access only the 2nd element
+x[c(2, 4)]      # access the 2nd and 4th element
+```
+
+
+::: {.myexercise}
+This vector has only 4 elements. But what happens if you ask for the 5th, not existing element? Check the documentation (`?`) what type of data the resulting 'value' is.
+:::
+
+`r hide()`
+```{r, eval = TRUE}
+x[5]
+```
+or another example
+
+```{r, eval = TRUE}
+x[c(1, 3, 5)]
+```
+
+Type  `?NA` to get the documentation: `NA` stands for "Not Available" and is an important basic "data type" that you need to know.
+`r unhide()`
+
+
+### Negative integers
+
+Negative integers exclude elements at the specified positions
+
+```{r eval=TRUE}
+x[-2]         # exclude 2nd element
+x[-c(3, 2)]   # exclude 3rd and 2nd element
+```
+
+### Logical vectors {#sec-subsettinglogicals}
+
+Logical vectors select elements where the corresponding logical value is `TRUE`.
+
+```{r eval=TRUE}
+x[c(TRUE, FALSE, TRUE, FALSE)]
+```
+It returns the elements 1 and 3, because these elements where `TRUE` in the logical vector.  This is probably the most useful type of subsetting, because you can write an expression that generate a logical vector. For instance, if you want to have all elements that are larger 3
+
+```{r eval=TRUE}
+x[x > 3]
+```
+**Importantly**, if you use logical vectors for subsetting, the logical should have the same length!
+
+::: {.geek}
+In `x[y]`, what happens if `x` and `y` have different lengths? This is, for instance, explained [here](https://adv-r.hadley.nz/subsetting.html).
+:::
+
+### With nothing
+
+Nothing returns the original vector.
+
+```{r eval=TRUE}
+x[]
+```
+
+Why shall I do this?  This is not useful for 1D vectors in this example, but, as you’ll see shortly in @sec-dataframes, it's very useful for data frames.
+
+##  Named vectors {#sec-namedvectors}
+
+_R_ object can have **attributes**. An attribute is a piece of information that you can attach to an atomic vector (or any _R_  object). The attribute won’t affect any of the values in the object, and it will not appear when you display your object. You can think of an attribute as “metadata”; it is just a convenient place to put information associated with an object. R will normally ignore this metadata, but some _R_  functions will check for specific attributes.
+
+For now the only important attribute is `name`. It's sometimes convenient to add names to values that you want to store. For instance, if you save the body length of three subjects ("Peter", "John", "Maria") in a vector you could do it like this:
+
+```{r}
+body_len <- c(1.84, 1.92, 1.71, 1.63)
+names(body_len) <- c("Peter", "John", "Maria", "Linda")
+```
+
+The object `body_len` has a `names` attribute and _R_  will display the names above the elements whenever you print the vector:
+
+```{r eval=TRUE}
+body_len
+```
+
+This will give you just the names:
+
+```{r eval=TRUE}
+names(body_len)
+```
+
+### Subsetting named vectors by `[name]`
+
+If the vector is named, you can also use the names or a vector of names to access selected elements. This is a  convenient feature and can produced more readable code:
+
+```{r eval=TRUE}
+body_len["Linda"]
+body_len[c("Maria", "Peter")]
+```

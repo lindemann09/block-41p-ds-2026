@@ -1,0 +1,33 @@
+
+# Interesting Packages {#sec-packagelist}
+
+| Name | Description |
+| ----------- | ----------- |
+| [lubridate](http://lubridate.tidyverse.org/) | Easy dealing with dates and times, see [tutorial](https://r4ds.had.co.nz/dates-and-times.html) |
+| [afex](https://cran.r-project.org/web/packages/afex/) | Analysis of factorial experiments |
+| [effectsize](https://easystats.github.io/effectsize/) | Indices of effect size and standardized parameters |
+| [pwr](https://cran.r-project.org/web/packages/pwr/) | Basic functions for power analysis |
+| [easypower](https://cran.r-project.org/web/packages/easypower) | Sample size estimation for experimental designs |
+| [lavaan](https://www.lavaan.ugent.be/) | Factor analysis and structural equation modeling |
+| [lme4](https://cran.r-project.org/web/packages/lme4/index.html) | Linear mixed-effects models |
+| [BayesFactor](https://richarddmorey.github.io/BayesFactor/) | Computation of Bayes bactors for common designs |
+| [metafor](http://www.metafor-project.org/) | Meta-analysis package |
+| [apaTables](https://cran.r-project.org/web/packages/apaTables/index.html) |  Create American Psychological Association (APA) style tables |
+| [rtweet](https://cran.r-project.org/web/packages/rtweet/index.html) |  Collecting Twitter data |
+
+### Examples Analyses {-}
+Most package come with well documented example analyses called *"vignettes"*. They are done with RMarkdown. Just type `vignette()` to see a list of the vignettes of all packages installed on your machine. For instance,  to see  an example ANOVA done with the `afex` packages, install `afex` and run  `vignette("afex_anova_example", package="afex")`.
+
+## RMarkdown {-}
+
+[R Markdown](https://rmarkdown.rstudio.com/) is perfect for generating reproducible data analyses and to write manuscripts and reports. Write _R_  code in your markdown reports. When you run render, _R_  Markdown will replace the code with its results and then export your report as an HTML, pdf, or MS Word document, or a HTML or pdf slideshow. This manual has been, for instance, written with _R_ Markdown and a extension called [bookdown](https://www.bookdown.org/).
+
+## Shiny Apps  {-}
+
+With [Shiny Apps](https://shiny.rstudio.com/) you can make interactive web apps. It's great to explore data and share findings with non-programmers.
+
+
+<!-- xxx  Vignettes
+* example afex: https://cran.r-project.org/web/packages/afex/vignettes/afex_anova_example.html
+ -->
+

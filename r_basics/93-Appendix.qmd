@@ -1,0 +1,19 @@
+# Compatibility Issues and Workarounds
+
+## Can't install _Tidyverse_ on MacOS or Linux {#sec-tidyverseinstall}
+
+Several libraries are mandatory for successfully installing the _Tidyverse_. Before you call the `install.package( )` command in R, you need to have some  programs installed. That is, if you encountered issues, install them like this:
+
+**MacOS**
+
+Use a terminal and install via brew:
+```
+brew install libxml2 openssl
+```
+
+**Linux**
+
+Terminal command:
+```
+sudo apt install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+```

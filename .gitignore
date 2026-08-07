@@ -1,0 +1,23 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+*.Rproj
+
+
+# quarto
+.quarto
+**/*.quarto_ipynb
+
+site_libs/
+_freeze
+_build/
+_site/
+_book/
+*.html
+*_files/
+
+
+.vscode/
+.DS_Store
