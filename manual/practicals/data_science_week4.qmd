@@ -1,6 +1,6 @@
 ---
-title: "Week X: Title"
-subtitle: "Subtitle"
+title: "Week 4: Neural Networks 1"
+subtitle: "Generalizing the Perceptron and the Delta Rule"
 format:
   html:
     toc: true
@@ -9,5 +9,241 @@ execute:
   warning: false
 ---
 
-## Motivation
-....
+## Before you start
+
+In the lecture you built a two-input perceptron (`w1`, `w2`, `bias`) on the roundness/elongation shape data,
+trained it with the delta rule, and watched it hit a wall on XOR. Rather than rebuilding the same two-input
+version here, this practical pushes it one step further: you'll generalize your perceptron to handle *any*
+number of inputs using vectors, apply it to a shape dataset with a third feature, and then bring it back down
+to two inputs at the very end to meet the XOR wall yourself.
+
+This matters beyond just "more practice": real networks don't have two hardcoded inputs named `w1` and `w2`
+— they have a *vector* of weights, one per input, however many there are. Writing `perceptron()` the vector
+way here is a small, concrete step toward the kind of code you'll see when hidden layers show up next week.
+
+You don't need to understand every line of R syntax perfectly — focus on understanding *what each step is
+doing conceptually*. If something errors, re-check you've run all the chunks above it in order.
+
+## Part 0: A three-feature shape dataset
+
+Same idea as the lecture's shapes, but this time each shape is described by **three** numbers instead of two:
+roundness, elongation, and symmetry.
+
+```{r}
+roundness  <- c(0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.3,
+                0.2, 0.15, 0.25, 0.3, 0.35, 0.4, 0.45, 0.7)
+elongation <- c(0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.75,
+                0.7, 0.8, 0.75, 0.65, 0.6, 0.55, 0.5, 0.2)
+symmetry   <- c(0.82, 0.78, 0.88, 0.74, 0.69, 0.64, 0.58, 0.32,
+                0.28, 0.22, 0.30, 0.36, 0.42, 0.46, 0.50, 0.60)
+category   <- c(1, 1, 1, 1, 1, 1, 1, 1,
+                0, 0, 0, 0, 0, 0, 0, 0)
+
+data <- data.frame(roundness, elongation, symmetry, category)
+data
+```
+
+**Question 1.** With three features instead of two, we can no longer plot the data on a single 2D scatter
+plot the way the lecture did. Make two separate scatter plots instead — roundness vs. elongation, and
+roundness vs. symmetry (colour the points by `category` in both, as in the lecture) — and describe in a
+sentence or two whether symmetry looks like it adds useful information on top of roundness and elongation,
+or whether it looks mostly redundant with them.
+
+```{r}
+# Your two plots here
+
+```
+
+**Question 1b (optional).** Two 2D plots just about work for 3 features, but that trick breaks down fast —
+with 10 or 50 features you can't look at every pair. One common fix is **dimensionality reduction**:
+squashing many features down into 2 numbers that preserve as much of the original structure as possible, so
+you can still plot it. Base R can do a simple version of this with no extra packages, using **Principal
+Component Analysis**:
+
+```{r}
+pca <- prcomp(data[, c("roundness", "elongation", "symmetry")], scale. = TRUE)
+plot(pca$x[, 1], pca$x[, 2], pch = 19,
+     col = ifelse(data$category == 1, "steelblue", "darkorange"),
+     xlab = "PC1", ylab = "PC2")
+```
+
+Do the two categories still separate cleanly in this compressed view? *(You may see the name* **t-SNE**
+*elsewhere as a fancier alternative to PCA — it tends to preserve local neighborhood structure better on
+large, messy, high-dimensional data, at the cost of being slower and less straightforward to interpret. Worth
+knowing the name; not needed for a tidy 3-feature dataset like this one.)*
+
+## Part 1: A perceptron for any number of inputs
+
+In the lecture, `perceptron(w1, w2, bias, x1, x2)` hardcoded exactly two inputs. That works fine for two, but
+you wouldn't want to write a function with 50 named arguments for a 50-input unit. The standard approach is
+to pass the weights as a single **vector**, and the inputs as a single vector too — then the weighted sum is
+just `sum(weights * x)`.
+
+**Question 2.** Write a function `sigmoid(x)` that returns `1 / (1 + exp(-x))` (same as the lecture — this
+part genuinely doesn't change).
+
+```{r}
+# Your function here
+
+```
+
+**Question 3.** Write a function `perceptron(weights, bias, x)`, where `weights` and `x` are numeric vectors
+of the *same length* (however long that is), that returns `sigmoid(sum(weights * x) + bias)`.
+
+```{r}
+# Your function here
+
+```
+
+**Question 4.** Test your generalized `perceptron()` on the first row of `data`, using
+`x = c(data$roundness[1], data$elongation[1], data$symmetry[1])` and a weight vector of your choosing, e.g.
+`weights = c(1, 1, 1)` and `bias = 0`. Then try it with only **two** weights and a two-element `x` (say, just
+roundness and elongation) — confirm the same function works unchanged for a different number of inputs. That
+flexibility is the entire point of writing it this way.
+
+```{r}
+# Your code here
+
+```
+
+## Part 2: How wrong is a guess?
+
+**Question 5.** Write a function `rmsd(weights, bias, data, feature_names)`, where `feature_names` is a
+character vector naming which columns of `data` to use as inputs (e.g. `c("roundness", "elongation",
+"symmetry")`). Inside the function, build each row's input vector from `data[, feature_names]`, run it
+through your `perceptron()`, and return the RMSD between `data$category` and the predictions across all rows.
+
+*Hint:* `as.matrix(data[, feature_names])` gives you a matrix where each row is one shape's inputs; you can
+loop over rows with a `for` loop, or use `apply()` with `MARGIN = 1` if you're comfortable with it — either
+is fine.
+
+```{r}
+# Your function here
+
+```
+
+**Question 6.** Try your `rmsd()` with a few different weight vectors and bias values, using all three
+features. Can you find a combination with a noticeably lower RMSD than the others?
+
+```{r}
+# Your code here
+
+```
+
+## Part 3: The delta rule, generalized
+
+The delta rule from the lecture generalizes the same way. You'll still loop over every row of the dataset,
+one example at a time, exactly as before — that part doesn't change. What changes is *within* each row's
+update: the lecture wrote one line to update `w1` and a separate line to update `w2`. Here, because `weights`
+and `xi` are vectors of the same length, R multiplies them element-by-element, so a single line —
+`weights <- weights + lr * delta * xi` — updates the *entire* weight vector at once, however many weights
+there are.
+
+$$\Delta \mathbf{w} = \eta \cdot (\text{target} - \text{predicted}) \cdot \text{predicted} \cdot (1 - \text{predicted}) \cdot \mathbf{x}$$
+
+**Question 7.** Fill in the blanks below to complete one training epoch using the generalized delta rule,
+on all three features.
+
+```{r}
+feature_names <- c("roundness", "elongation", "symmetry")
+weights <- c(0.1, 0.1, 0.1)
+bias <- 0.1
+lr <- 0.5
+
+for (i in 1:nrow(data)) {
+  xi <- as.numeric(data[i, feature_names])
+  target <- data$category[i]
+
+  pred <- perceptron(weights, bias, xi)
+  delta <- (target - pred) * pred * (1 - pred)
+
+  # weights <- weights + lr * ___ * ___
+  # bias    <- bias + lr * ___
+}
+
+c(weights, bias)
+```
+
+**Question 8.** Extend this into a full training loop over 200 epochs, storing the RMSD after each epoch in
+a vector called `loss_history`, then plot it. (Same structure as the lecture's training loop — wrap your
+Question 7 code in an outer loop over epochs, and calculate the RMSD once at the end of each epoch.)
+
+```{r}
+# Your training loop here
+
+```
+
+```{r}
+# Your loss_history plot here
+
+```
+
+**Question 9.** Now repeat Questions 7–8 using only **two** features — `c("roundness", "elongation")` — and
+compare the final RMSD to the three-feature version. Does adding symmetry actually help here, or does it make
+little difference? Relate this back to your answer in Question 1.
+
+```{r}
+# Your two-feature training loop here
+
+```
+
+## Part 4: The learning rate
+
+**Question 10.** Re-run your three-feature training loop from Question 8 with a few different learning rates:
+something small (`lr <- 0.01`), the original (`lr <- 0.5`), something larger (`lr <- 5`), and something
+extreme (`lr <- 50`). Plot `loss_history` for each and compare the shapes of the curves — don't assume in
+advance what "too large" will look like; let the plots tell you.
+
+```{r}
+# Your code here
+
+```
+
+## Part 5: Back to two dimensions — visualizing a decision boundary
+
+Decision boundaries are easy to draw in 2D but not in 3D, so for this part, go back to using just
+`c("roundness", "elongation")` as in Question 9.
+
+**Question 11.** Extend your two-feature training loop to save the weights and bias at epochs 1, 5, 20, and
+200, then plot the data with the decision boundary line (`elongation = -(w[1]*roundness + bias) / w[2]`)
+overlaid at each checkpoint, using a different colour per checkpoint. (This is the same idea shown in the
+lecture — try to reconstruct the checkpointing logic yourself rather than copying it directly.)
+
+```{r}
+# Your code here
+
+```
+
+## Part 6: The XOR wall
+
+The generalized `perceptron()` and `rmsd()` you wrote above work for XOR too — it's just another two-feature
+dataset.
+
+```{r}
+x1 <- c(0, 0, 1, 1)
+x2 <- c(0, 1, 0, 1)
+category <- c(0, 1, 1, 0)
+
+xor_data <- data.frame(x1, x2, category)
+xor_data
+```
+
+```{r}
+plot(xor_data$x1, xor_data$x2, pch = 19, cex = 3,
+     col = ifelse(xor_data$category == 1, "steelblue", "darkorange"),
+     xlab = "Input 1", ylab = "Input 2", xlim = c(-0.5, 1.5), ylim = c(-0.5, 1.5))
+```
+
+**Question 12.** Train your generalized perceptron on `xor_data` (features `c("x1", "x2")`), using your
+Question 8-style training loop. Plot the resulting `loss_history`. Does it ever get close to zero, no matter
+how many epochs you run or what learning rate you try?
+
+```{r}
+# Your code here
+
+```
+
+**Question 13 (discussion).** Try to find, just by eye, a single straight line on the plot above that puts
+both blue points on one side and both orange points on the other. What does this tell you about why the loss
+in Question 12 refuses to go down, no matter how you train the network? (Recall the lecture's "What kind of
+boundary would work?" slide — in your own words, what *would* it take to separate these four points?)
