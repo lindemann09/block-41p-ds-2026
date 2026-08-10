@@ -25,11 +25,11 @@ This course is coordinated by Oliver Lindemann and Yaniv Morgenstern. Contact de
 
 | Week        | Topic | Lecture (Tue)                | Tutorial   (Thu)                           |
 | ----------- | ----- | ---------------------------- | ------------------------------------------ |
-| `r week(1)` | 1     | Introduction to Data Science | Getting Started with R|
-| `r week(2)` | 2     | Computational Models         | Data & Simulations    |
-| `r week(3)` | 3     | Topic 3                      |                                            |
-| `r week(4)` | 4     | Topic 4                      |                                            |
-| `r week(5)` | 5     | Topic 5                      |                                            |
+| `r week(1)` | 1     | Introduction to Data Science | Getting Started with R I                   |
+| `r week(2)` | 2     | Parameter Estimation         | Getting Started with R II                  |
+| `r week(3)` | 3     | Neural Networks 1            | Parameter Estimation                       |
+| `r week(4)` | 4     | Neural Networks 2            | Neural Networks 1                          |
+| `r week(5)` | 5     | Topic 5                      | Neural Networks 2                          |
 | `r week(6)` | 6     | Topic 6                      |                                            |
 | `r week(7)` | 7     | Topic 7                      |                                            |
 | `r week(8)` | 8     | Topic 8                      |                                            |
@@ -37,7 +37,7 @@ This course is coordinated by Oliver Lindemann and Yaniv Morgenstern. Contact de
 
 ## Learning Objectives
 
-The general learning objects of this course are .......
+The general learning objects of this course are to devleop a blend of computational, analysical, and conceptual skills essential for modern cognitive and behavioural science. This includes Data Science in R (data wrangling, visualization, simulation, writing functions, and loops), Statisical and Computational modelling (data fitting methods, model comparisons, interpreting model parameters), and fundamentals of machine learning and artificial intellegence (introduction to neural network models and deep learning).
 
 
 ## Learning Activities

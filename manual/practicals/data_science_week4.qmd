@@ -50,6 +50,7 @@ sentence or two whether symmetry looks like it adds useful information on top of
 or whether it looks mostly redundant with them.
 
 ```{r}
+#| eval: false
 # Your two plots here
 
 ```
@@ -83,6 +84,7 @@ just `sum(weights * x)`.
 part genuinely doesn't change).
 
 ```{r}
+#| eval: false
 # Your function here
 
 ```
@@ -91,6 +93,7 @@ part genuinely doesn't change).
 of the *same length* (however long that is), that returns `sigmoid(sum(weights * x) + bias)`.
 
 ```{r}
+#| eval: false
 # Your function here
 
 ```
@@ -102,6 +105,7 @@ roundness and elongation) — confirm the same function works unchanged for a di
 flexibility is the entire point of writing it this way.
 
 ```{r}
+#| eval: false
 # Your code here
 
 ```
@@ -118,6 +122,7 @@ loop over rows with a `for` loop, or use `apply()` with `MARGIN = 1` if you're c
 is fine.
 
 ```{r}
+#| eval: false
 # Your function here
 
 ```
@@ -126,6 +131,7 @@ is fine.
 features. Can you find a combination with a noticeably lower RMSD than the others?
 
 ```{r}
+#| eval: false
 # Your code here
 
 ```
@@ -145,6 +151,7 @@ $$\Delta \mathbf{w} = \eta \cdot (\text{target} - \text{predicted}) \cdot \text{
 on all three features.
 
 ```{r}
+#| eval: false
 feature_names <- c("roundness", "elongation", "symmetry")
 weights <- c(0.1, 0.1, 0.1)
 bias <- 0.1
@@ -169,11 +176,13 @@ a vector called `loss_history`, then plot it. (Same structure as the lecture's t
 Question 7 code in an outer loop over epochs, and calculate the RMSD once at the end of each epoch.)
 
 ```{r}
+#| eval: false
 # Your training loop here
 
 ```
 
 ```{r}
+#| eval: false
 # Your loss_history plot here
 
 ```
@@ -183,6 +192,7 @@ compare the final RMSD to the three-feature version. Does adding symmetry actual
 little difference? Relate this back to your answer in Question 1.
 
 ```{r}
+#| eval: false
 # Your two-feature training loop here
 
 ```
@@ -195,6 +205,7 @@ extreme (`lr <- 50`). Plot `loss_history` for each and compare the shapes of the
 advance what "too large" will look like; let the plots tell you.
 
 ```{r}
+#| eval: false
 # Your code here
 
 ```
@@ -210,6 +221,7 @@ overlaid at each checkpoint, using a different colour per checkpoint. (This is t
 lecture — try to reconstruct the checkpointing logic yourself rather than copying it directly.)
 
 ```{r}
+#| eval: false
 # Your code here
 
 ```
@@ -239,6 +251,7 @@ Question 8-style training loop. Plot the resulting `loss_history`. Does it ever 
 how many epochs you run or what learning rate you try?
 
 ```{r}
+#| eval: false
 # Your code here
 
 ```
