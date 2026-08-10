@@ -1,6 +1,6 @@
 ---
-title: "Week X: Title"
-subtitle: "Subtitle"
+title: "Week 3: Parameter Estimation"
+subtitle:  "Basic Methods & Maximum Likelihood"
 format:
   html:
     toc: true
@@ -9,5 +9,256 @@ execute:
   warning: false
 ---
 
-## Motivation
-....
+## Before you start
+
+This tutorial uses the same psychometric-function dataset from the lecture. You'll rebuild the grid search
+and `optim()` fits yourself, then learn how a dataset like this could be simulated with known parameters (so
+you can check whether your methods recover the truth), and finally compare today's Weibull model against
+the linear model you already know from statistics.
+
+You don't need to understand every line of R syntax perfectly — focus on understanding *what each step is
+doing conceptually*. If something errors, re-check you've run all the chunks above it in order.
+
+## Part 0: Setup and data
+
+Run this chunk first — this is the same dataset from the lecture, presented as if it were real data (there's
+no "true" underlying parameter values to reveal here, just like with a real participant).
+
+```{r}
+intensity <- 1:9
+n_trials <- rep(40, 9)
+n_yes <- c(0, 4, 8, 16, 25, 28, 37, 39, 40)
+prop_yes <- n_yes / n_trials
+
+data <- data.frame(intensity, n_yes, n_trials, prop_yes)
+data
+```
+
+```{r}
+psychometric_model <- function(alpha, beta, x) {
+  y <- rep(0, length(x))
+  valid <- x >= 0
+  y[valid] <- 1 - exp(-(x[valid] / alpha)^beta)
+  y
+}
+
+plot(data$intensity, data$prop_yes, pch = 19,
+     xlab = "Stimulus intensity", ylab = "Proportion 'yes' responses",
+     ylim = c(0, 1))
+```
+
+**Question 1.** Just by looking at the table and plot above, roughly guess values of `alpha` (scale — where
+the curve is around 63%) and `beta` (shape — how sharply it rises). Write your guesses down; you'll compare
+them to a proper fit shortly.
+
+## Part 1: Grid search by hand
+
+```{r}
+rmsd <- function(params, data) {
+  alpha <- params[1]
+  beta <- params[2]
+  predicted <- psychometric_model(alpha, beta, data$intensity)
+  sqrt(mean((data$prop_yes - predicted)^2))
+}
+```
+
+**Question 2.** Use the `rmsd()` function to compare your eyeballed guess from Question 1 against two other
+guesses of your choice. Which has the lowest RMSD?
+
+```{r}
+# Try it here: rmsd(c(alpha_guess, beta_guess), data)
+
+```
+
+Now do a full grid search:
+
+```{r}
+alpha_vals <- seq(1, 9, length.out = 100)
+beta_vals <- seq(0.1, 6, length.out = 100)
+grid <- expand.grid(alpha = alpha_vals, beta = beta_vals)
+grid$rmsd <- apply(grid, 1, function(row) rmsd(row, data))
+
+best <- grid[which.min(grid$rmsd), ]
+best
+```
+
+```{r}
+library(lattice)
+levelplot(rmsd ~ alpha * beta, data = grid, xlab = "alpha (scale)", ylab = "beta (shape)")
+```
+
+**Question 3.** How close was your eyeballed guess to the grid search result? What does the dark "valley"
+region in the plot represent?
+
+## Part 2: Automatic search with `optim()`
+
+```{r}
+fit_rmsd <- optim(par = c(alpha = 4, beta = 1), fn = rmsd, data = data)
+fit_rmsd$par
+```
+
+**Question 4.** Change the starting guess (the `par` argument) to something far off, e.g. `c(alpha = 1,
+beta = 5.5)`, and re-run. Does `optim()` still find (roughly) the same answer? Try a really extreme starting
+guess — can you get it to fail or get stuck? (Recall from the lecture: `optim()`'s default method is
+Nelder-Mead simplex, which can in principle get stuck in a local minimum — though for this particular
+two-parameter problem, the RMSD surface has only one clean valley, so it's unlikely to happen here.)
+
+```{r}
+# Try alternative starting values here
+
+```
+
+**Question 5.** Compare `fit_rmsd$par` to your Question 1 eyeball guess. Which do you trust more, and why?
+(Notice there's no "true" value here to check against, since this is real-looking data, not simulated data —
+that's exactly why systematic fitting matters more than eyeballing, not less: in real research you usually
+don't have a ground truth to compare to.)
+
+## Part 3: Maximum likelihood estimation
+
+```{r}
+nll <- function(params, data) {
+  alpha <- params[1]; beta <- params[2]
+  predicted <- psychometric_model(alpha, beta, data$intensity)
+  predicted <- pmin(pmax(predicted, 1e-6), 1 - 1e-6)
+  -sum(dbinom(data$n_yes, data$n_trials, predicted, log = TRUE))
+}
+
+fit_mle <- optim(par = c(alpha = 4, beta = 1), fn = nll, data = data)
+fit_mle$par
+```
+
+**Question 6.** Compare `fit_mle$par` to `fit_rmsd$par`. Are they similar?
+
+**Question 7 (discussion).** RMSD asks "which parameters minimize the average squared prediction error?"
+MLE asks "which parameters make the observed data most probable?" In your own words, why might these two
+questions often — but not always — lead to similar answers?
+
+*Hint:* try comparing what happens at an intensity where `prop_yes` is close to 0.5 versus one where it's
+close to 0 or 1 (check the `data` table from Part 0 for examples of both). Does a "miss" of the same size —
+say, the model predicting 2 fewer "yes" responses than observed — feel like it should count the same in both
+cases? RMSD treats every miss the same regardless of where it happens; does likelihood?
+
+## Part 4: Simulating your own data
+
+So far you've worked with a fixed dataset. In real research, it's common to simulate data from known
+parameters first, to check that your fitting methods actually recover the truth before trusting them on real
+data. Here's how, using the same `rbinom()` function from Practical 2, together with the Weibull formula from
+`psychometric_model()` to generate the underlying probabilities.
+
+```{r}
+set.seed(99)
+intensity_sim <- 1:9
+true_alpha <- 4
+true_beta <- 2
+p_true <- psychometric_model(true_alpha, true_beta, intensity_sim)
+
+n_trials_sim <- rep(40, 9)
+n_yes_sim <- rbinom(length(intensity_sim), n_trials_sim, p_true)
+prop_yes_sim <- n_yes_sim / n_trials_sim
+
+data_sim <- data.frame(intensity = intensity_sim, n_yes = n_yes_sim,
+                        n_trials = n_trials_sim, prop_yes = prop_yes_sim)
+data_sim
+```
+
+```{r}
+plot(data_sim$intensity, data_sim$prop_yes, pch = 19,
+     xlab = "Stimulus intensity", ylab = "Proportion 'yes' responses", ylim = c(0, 1))
+```
+
+This is the general pattern for simulating any dataset: pick true parameter values, feed them into your model
+to get predicted probabilities, then use `rbinom()` to add realistic trial-to-trial noise on top of those
+predictions.
+
+**Question 8.** Using either `rmsd()` + `optim()`, or `nll()` + `optim()` (your choice), fit the
+psychometric model to `data_sim`. Report your estimated `alpha` and `beta`.
+
+```{r}
+# Your fit here
+
+```
+
+**Question 9.** Compare your fitted `alpha` and `beta` to `true_alpha` and `true_beta` in the chunk above.
+How close is the recovered estimate to the parameters that actually generated the data?
+
+**Question 10.** Plot the fitted curve on top of `data_sim`. Here's a scaffold to get you started — replace
+the two blanks with your fitted `alpha` and `beta` from Question 8 (e.g. `fit_sim$par[1]` and
+`fit_sim$par[2]`, assuming you called your fitted object `fit_sim`):
+
+```{r}
+plot(data_sim$intensity, data_sim$prop_yes, pch = 19,
+     xlab = "Stimulus intensity", ylab = "Proportion 'yes' responses", ylim = c(0, 1))
+
+x_seq <- seq(0, 9, length.out = 200)
+# lines(x_seq, psychometric_model(___, ___, x_seq), col = "blue")
+```
+
+If the line doesn't appear, double check: (1) the `lines()` call above is uncommented (no `#` in front), (2)
+you've replaced both blanks with actual numbers or variable references, and (3) you ran the fit in Question
+8 in the same session, so the object you're referencing still exists.
+
+**Question 11 (interpretation).** In plain psychological language (not equations), what do this simulated
+participant's `alpha` and `beta` tell you about their sensitivity, compared to the participant from Part
+0–3? Does this participant have a higher or lower scale (sensitivity), a sharper or shakier transition, or
+some combination?
+
+**Question 12 (extension).** Since you can see (and edit) the simulation code above, try changing
+`true_alpha` and/or `true_beta` to values of your own choosing — pick something quite different from 4 and 2
+(e.g. a much lower `alpha`, or a very shallow or very steep `beta`) — then re-run that chunk and repeat
+Questions 8–10 on your new dataset. Does your fitting procedure still recover your chosen values accurately?
+Are there any combinations where recovery seems to work noticeably less well, and if so, what do you think
+might be going on (hint: think back to the lecture's discussion of what makes a landscape easy or hard to
+search)?
+
+## Part 5: Does the shape of the model matter?
+
+So far we've assumed detection follows a Weibull curve. But you already know a simpler model from your
+statistics background: a straight line, $y = a + b \cdot x$. Let's see how well it does on the **same data
+from Part 0–3** (the `data` object), compared to the Weibull model you already fit (`fit_rmsd`).
+
+This part is more independent than the previous ones — you're writing the functions from scratch, based on
+the pattern of `psychometric_model()` and `rmsd()` you've already used, rather than adapting code that's
+given to you.
+
+**Question 13.** Write a function `linear_model(a, b, x)` that returns `a + b * x`.
+
+```{r}
+# Your function here
+
+```
+
+**Question 14.** Write a function `rmsd_linear(params, data)`, following the same structure as `rmsd()`, but
+using `linear_model()` instead of `psychometric_model()`.
+
+```{r}
+# Your function here
+
+```
+
+**Question 15.** Fit the linear model to `data` using `optim()` (try a starting guess like
+`c(a = 0, b = 0.1)`). Report the fitted `a` and `b`, and the resulting RMSD value (`$value`).
+
+```{r}
+# Your fit here
+
+```
+
+**Question 16.** Compare the RMSD of your linear fit to the RMSD of the Weibull fit (`fit_rmsd$value`).
+Which model achieves a lower RMSD on this data?
+
+**Question 17.** Plot `data` again, and overlay *both* fitted curves (Weibull in one color, linear in
+another) using `lines()`. Visually, where do the two models agree, and where do they most clearly diverge?
+
+```{r}
+# Your plot here
+
+```
+
+**Question 18 (discussion).** A lower RMSD isn't automatically "the better model" — a model with more
+flexibility can often fit any given dataset more closely, whether or not it's a good theory of the
+underlying process. Just based on what you can see in your plot from Question 17: `prop_yes` is a
+*proportion*, so it can only ever be between 0 and 1. Does the linear model's fitted line respect that
+constraint across the full intensity range shown, or does it predict something impossible somewhere?
+(Hint: check what the linear model predicts at intensity = 1 and at intensity = 9.) We'll cover how to
+formally judge whether extra fit flexibility is "worth it" in the Model Comparison sessions later in the
+course — for now, just describe what you notice.
