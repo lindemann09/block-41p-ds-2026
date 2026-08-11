@@ -21,7 +21,8 @@ join:
 			-T "Quarto files for tutorial sessions" > index.html
 
 install_requirements:
-	Rscript -e 'install.packages(c("rmarkdown", "knitr", "tidyverse", "webexercises", "praise"))'
+	Rscript -e 'options(repos = c(CRAN = "https://cran.uni-muenster.de"))' \
+			-e ' install.packages(c("rmarkdown", "knitr", "tidyverse", "webexercises", "praise"))'
 
 clean:
 	rm -Rf _build
