@@ -23,18 +23,18 @@ website:
           href: practicals/data_science_week1.qmd
         - text: "Week 2"
           href: practicals/data_science_week2.qmd
-        - text: "Week 3"
-          href: practicals/data_science_week3.qmd
-        - text: "Week 4"
-          href: practicals/data_science_week4.qmd
-        - text: "Week 5"
-          href: practicals/data_science_week5.qmd
-        - text: "Week 6"
-          href: practicals/data_science_week6.qmd
-        - text: "Week 7"
-          href: practicals/data_science_week7.qmd
-        - text: "Week 8"
-          href: practicals/data_science_week8.qmd
+#        - text: "Week 3"
+#          href: practicals/data_science_week3.qmd
+#        - text: "Week 4"
+#          href: practicals/data_science_week4.qmd
+#        - text: "Week 5"
+#          href: practicals/data_science_week5.qmd
+#        - text: "Week 6"
+#          href: practicals/data_science_week6.qmd
+#        - text: "Week 7"
+#          href: practicals/data_science_week7.qmd
+#        - text: "Week 8"
+#          href: practicals/data_science_week8.qmd
         - text: "Download QMD Files"
           href: qmd/index.html
 
