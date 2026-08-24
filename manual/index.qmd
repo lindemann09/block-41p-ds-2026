@@ -1,6 +1,10 @@
 ---
-title: "Data Science Practical"
-subtitle: "Block 4.1"
+title: "Block 4.1 Practical: Data Science "
+subtitle: "Erasmus Univeristy Rotterdam"
+author:
+  - name: "Oliver Lindemann"
+  - name: "Yaniv Morgenstern"
+
 format:
   html:
     toc: true
@@ -9,65 +13,76 @@ execute:
   warning: false
 ---
 
-```{r}
-#| echo: false
-source("incl/useful_functions.R")
-```
 
+This manual contains all instructions and the important study material for the course "Data Science". You can find the weekly exercises for the practical sessions in the menu above.
 
-* Authors: "Oliver Lindemann and Yaniv Morgenstern"
-
-This manual contains all instructions and the important study material for the course "Data Science".
-
-This course is coordinated by Oliver Lindemann and Yaniv Morgenstern. Contact details can be found on `r canvas`.
+Further information about this course are found on [Canvas](https://canvas.eur.nl/courses//55946).
 
 ## Schedule
 
-| Week        | Topic | Tutorial   (11:00)        | Lecture (13:00)                |
-| ----------- | ----- | ------------------------- | ------------------------------ |
-| `r week(1)` | 1     | Getting Started with R I  | Introduction to Data Science   |
-| `r week(2)` | 2     | Getting Started with R II | Parameter Estimation           |
-| `r week(3)` | 3     | Parameter Estimation      | Neural Networks 1              |
-| `r week(4)` | 4     | Neural Networks 1         | Neural Networks 2              |
-| `r week(5)` | 5     | Neural Networks 2         | Cognitive Models in Psychology |
-| `r week(6)` | 6     | Cognitive Models I        | Random walk methods            |
-| `r week(7)` | 7     | Cognitive Models II       | Reaction Time Models           |
-| `r week(8)` | 8     | Cognitive Models III      | Q & A Lecture                  |
-| `r week(9)` |       |                           | *Exam week*                    |
+```{r}
+#| echo: false
+week <- function(x) {
+  w = as.Date('1.9.2026',format='%d.%m.%Y') + 7*(x-1)
+  txt = format(w, format = "%d/%m")
+  return(txt)
+}
 
-## Learning Objectives
+# linked materials
+visible_practicals = 2
+visible_lectures = 0
 
-The general learning objects of this course are to devleop a blend of computational, analysical, and conceptual skills essential for modern cognitive and behavioural science. This includes Data Science in R (data wrangling, visualization, simulation, writing functions, and loops), Statisical and Computational modelling (data fitting methods, model comparisons, interpreting model parameters), and fundamentals of machine learning and artificial intellegence (introduction to neural network models and deep learning).
+practical_title = c(
+  "Getting Started with R I",
+  "Getting Started with R II",
+  "Parameter Estimation",
+  "Neural Networks 1",
+  "Neural Networks 2",
+  "Cognitive Models in Psychology",
+  "Cognitive Models I",
+  "Cognitive Models II",
+  "Cognitive Models III")
+
+lecture_tile= c(
+  "Introduction to Data Science",
+  "Parameter Estimation",
+  "Neural Networks 1",
+  "Neural Networks 2",
+  "Cognitive Models in Psychology",
+  "Random walk methods",
+  "Reaction Time Models",
+  "Q & A Lecture")
+
+## week link
+practical <- function(week) {
+  if (week <= visible_practicals) {
+    return(paste0("[", practical_title[week], "](practicals/data_science_week", week, ".qmd)"))
+  } else {
+    return(practical_title[week])
+  }
+}
+
+lecture <- function(week) {
+  if (week <= visible_lectures) {
+    return(paste0("[", lecture_tile[week], "](lectures/lecture", week, ".pdf)"))
+  } else {
+    return(lecture_tile[week])
+  }
+}
 
 
-## Learning Activities
+```
 
-### Self-Study
-
-The largest part of your time spent on this course will be taken up by
-self-study, that is, for reading and working on the exercisions. This
-course manual provides for each topic the required textbook chapters and articles.
-The study material is **available online**.
-
-::: {.callout-important appearance="important" title="Required Reading"}
-All required reading material is available online. You can find the list of the literature including download links under [materials](materials.qmd).
-
-:::
-
-You may find further sources and alternative literature to aid your
-understanding of the complex topics.
-
-### Course Lectures
-
-Every *XXXX* will be a lecture for this course.
-
-::: {.callout-note appearance="simple" title="Lectures"}
-The lectures are highly relevant for this course as they structure the
-complex subjects and provide an overview about the topics.
-They play a crucial role in assisting you to navigate through the necessary readings and exercises.
-:::
+| Week        | Topic | Tutorial   (11:00) | Lecture (13:00) |
+| ----------- | ----- | ------------------ | --------------- |
+| `r week(1)` | 1     | `r practical(1)`   | `r lecture(1)`  |
+| `r week(2)` | 2     | `r practical(2)`   | `r lecture(2)`  |
+| `r week(3)` | 3     | `r practical(3)`   | `r lecture(3)`  |
+| `r week(4)` | 4     | `r practical(4)`   | `r lecture(4)`  |
+| `r week(5)` | 5     | `r practical(5)`   | `r lecture(5)`  |
+| `r week(6)` | 6     | `r practical(6)`   | `r lecture(6)`  |
+| `r week(7)` | 7     | `r practical(7)`   | `r lecture(7)`  |
+| `r week(8)` | 8     | `r practical(8)`   | `r lecture(8)`  |
 
 
-### Tutorial group meetings
-
-Tutorial group meetings will take place every *XXX* (see your timetable). This manual comprises the topics and the materials for the group meetings.
+Exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
