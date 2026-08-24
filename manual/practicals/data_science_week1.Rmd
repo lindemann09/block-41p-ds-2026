@@ -1,7 +1,257 @@
 ---
-title: "Week X: Title"
-subtitle: "Subtitle"
+title: "Practical 1: R Exercises I"
+subtitle: "The R Basics"
+output:
+  html_document:
+    toc: true
+format:
+  html:
+    toc: true
+    toc-expand: 2
 ---
 
-## Motivation
-....
+## Before you start
+
+This session is entirely exercises based on our
+[R Basics for Data Science](https://lindemann09.github.io/block-41p-ds-2026/r_basics/) tutorial, which you
+should read (or at least skim) before this session. Nothing here repeats his explanations; each part below
+just gives a one-line reminder of what it's practicing, then gets straight to exercises. The one exception is
+Part 3 ("Numerical gotchas"), which covers a few special values our manual doesn't — you'll see this
+same idea again later in the course.
+
+If you get stuck, the fix is almost always: go back and re-read the matching section of our manual, or
+use `?functionname` to check what a function actually expects.
+
+-------------------------------------------
+
+## Part 1: Variables and basic operations
+
+*(Reminder: `<-` assigns a value to a name; R evaluates arithmetic the way a calculator would.)*
+
+### Exercise 1
+
+ A study collects three reaction times, in milliseconds: 452, 618, and 390. Store each in its
+own variable, then compute their average by hand (adding and dividing) — don't use `mean()` yet, that comes
+later.
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 2
+
+ A participant's score starts at 0. Over three trials they gain 4, then lose 1, then gain 2
+points. Using the "update a variable by reassigning it" pattern from the manual (`x <- x + 1`), track their
+score through all three trials, printing it after each one.
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 3
+
+ If `r` is the radius of a circle, the area is $\pi r^2$. Compute the area of a circle with
+radius 7.5 (R has `pi` built in).
+
+```{r}
+# Your code here
+
+```
+
+----------------------------------
+
+## Part 2: Data types
+
+*(Reminder: numbers, character strings, and logicals (`TRUE`/`FALSE`) are different types; R will sometimes
+convert between them, which can cause quiet, confusing bugs.)*
+
+### Exercise 4
+
+ Store the text `"25"` in a variable called `age_text`. Try multiplying it by 2. What happens,
+and why? Now fix it using the appropriate `as.` function from the manual, and try again.
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 5
+
+ Without running any code, predict what each of these will print. Then run them to check.
+
+```r
+5 > 3
+5 == "5"
+!(5 > 3)
+"cat" == "dog"
+```
+
+### Exercise 6
+
+ A participant's response was recorded as `TRUE` (they pressed the correct key) or `FALSE`
+(they didn't). Write one line of code that converts a logical value `responded_correctly <- TRUE` into the
+text `"correct"` or `"incorrect"`. *(Hint: you don't need an if-statement for this — search for `ifelse()`
+in R's help, or just use `paste()` creatively. If-statements themselves are next session.)*
+
+```{r}
+# Your code here
+
+```
+
+----------------------------------
+
+## Part 3: Numerical gotchas — when R goes quiet instead of throwing an error
+
+You've already met `NA` ("not available") in our manual. R has a few other special values that behave
+similarly — and unlike a normal error, which stops your code and shows you a clear red message, these values
+often just slot silently into your result and keep going. That's what makes them genuinely dangerous: your
+code doesn't crash, it just quietly starts computing the wrong thing.
+
+### Exercise 7
+
+ Predict, then check, what each of these produces:
+
+```r
+1 / 0
+-1 / 0
+0 / 0
+log(0)
+log(-1)
+```
+
+You should see two new special values: `Inf` (and `-Inf`), meaning "a number too large to represent, in that
+direction" — not an error, a genuine value R will happily keep computing with — and `NaN`, meaning "not a
+number," R's way of saying "this calculation has no sensible numeric answer at all."
+
+### Exercise 8
+
+ R gives you three functions to check for these values: `is.na()`, `is.nan()`, and
+`is.finite()`. Run all three of them on each of `NA`, `NaN`, `Inf`, and an ordinary number like `5`, and fill
+in which combinations return `TRUE`. One result should genuinely surprise you — `is.na(NaN)`. Look up
+`?is.na` to find out why R treats `NaN` as a special case of `NA`, rather than as something completely
+separate.
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 9 (discussion)
+
+ Run this:
+
+```{r}
+values <- c(3, 5, NaN, 2, 8)
+sum(values)
+mean(values)
+```
+
+Even though 4 of the 5 numbers are completely ordinary, the result is `NaN` — one bad value was enough to
+"poison" the entire calculation. This is a preview of something you'll run into for real later in the
+course: a single `log(0)` buried inside a much larger calculation (like a model's total fit to a whole
+dataset) can silently turn the *entire* result into `-Inf` or `NaN`, not just the one data point that
+actually caused it. Keep this pattern in mind — you'll meet the full version of this problem, and the fix
+for it, in the Supervised Learning practical.
+
+----------------------------------
+
+## Part 4: Calling functions
+
+*(Reminder: functions are called with `name(argument1, argument2, ...)`; use `?functionname` to see what
+arguments a function takes and which have defaults.)*
+
+### Exercise 10
+
+ Look up the help documentation for `round()`. Use it to round 3.14159 to 2 decimal places.
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 11
+
+ Generate 8 random numbers from a normal distribution with mean 100 and standard deviation
+15 (same distribution mentioned in the manual for IQ scores).
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 12
+
+ Nest three function calls together in one line: take the square root of the natural log of
+50.
+
+```{r}
+# Your code here
+
+```
+
+----------------------------------
+
+## Part 5: Vectors
+
+*(Reminder: `c()` builds a vector; operations on a vector apply to every element at once; `[]` extracts
+elements by position, by exclusion, or by a logical condition.)*
+
+### Exercise 13
+
+ Store these five reaction times (ms) in a vector: 452, 618, 390, 705, 511.
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 14
+
+ Using your Exercise 13 vector: compute the mean and the maximum with built-in functions
+(not by hand this time), then subtract the mean from every value in one line (this is called
+"mean-centering," and you'll meet it again later in the course).
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 15
+
+ From the same vector, extract: (a) the 2nd and 4th elements; (b) every value greater than
+500; (c) all values *except* the maximum. *(Hint for (c): combine `which.max()` with negative indexing.)*
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 16
+
+ Create a named vector storing the ages of three lab members: Alex (28), Priya (34), and Sam
+(25). Retrieve Priya's age using her name, not her position.
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 17
+
+ Generate a sequence of 10 evenly-spaced numbers between 0 and 1 (you've seen the function
+for this both in the manual and already in the course's own lecture material).
+
+```{r}
+# Your code here
+
+```
+
+### Exercise 18 (discussion)
+
+ Exercise 14 asked you to subtract the mean from *every* value in your vector,
+in a single line, with no loop. Why does this work? What is R actually doing, one element at a time, behind
+that one line of code? Keep this Exercise in mind — next session's whole final section is about exactly this
+idea.
+

@@ -13,7 +13,6 @@ execute:
   warning: false
 ---
 
-
 This manual website contains all instructions and the important study materials for the course "Data Science". Further information about this course are found on [Canvas](https://canvas.eur.nl/courses//55946).
 
 ## Schedule
