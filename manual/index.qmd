@@ -23,17 +23,17 @@ This course is coordinated by Oliver Lindemann and Yaniv Morgenstern. Contact de
 
 ## Schedule
 
-| Week        | Topic | Lecture (Tue)                | Tutorial   (Thu)                           |
-| ----------- | ----- | ---------------------------- | ------------------------------------------ |
-| `r week(1)` | 1     | Introduction to Data Science | Getting Started with R I                   |
-| `r week(2)` | 2     | Parameter Estimation         | Getting Started with R II                  |
-| `r week(3)` | 3     | Neural Networks 1            | Parameter Estimation                       |
-| `r week(4)` | 4     | Neural Networks 2            | Neural Networks 1                          |
-| `r week(5)` | 5     | Topic 5                      | Neural Networks 2                          |
-| `r week(6)` | 6     | Topic 6                      |                                            |
-| `r week(7)` | 7     | Topic 7                      |                                            |
-| `r week(8)` | 8     | Topic 8                      |                                            |
-| `r week(9)` |       | *Exam week*                  |                                            |
+| Week        | Topic | Tutorial   (11:00)        | Lecture (13:00)                |
+| ----------- | ----- | ------------------------- | ------------------------------ |
+| `r week(1)` | 1     | Getting Started with R I  | Introduction to Data Science   |
+| `r week(2)` | 2     | Getting Started with R II | Parameter Estimation           |
+| `r week(3)` | 3     | Parameter Estimation      | Neural Networks 1              |
+| `r week(4)` | 4     | Neural Networks 1         | Neural Networks 2              |
+| `r week(5)` | 5     | Neural Networks 2         | Cognitive Models in Psychology |
+| `r week(6)` | 6     | Cognitive Models I        | Random walk methods            |
+| `r week(7)` | 7     | Cognitive Models II       | Reaction Time Models           |
+| `r week(8)` | 8     | Cognitive Models III      | Q & A Lecture                  |
+| `r week(9)` |       |                           | *Exam week*                    |
 
 ## Learning Objectives
 
