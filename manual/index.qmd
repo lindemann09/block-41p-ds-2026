@@ -14,9 +14,7 @@ execute:
 ---
 
 
-This manual contains all instructions and the important study material for the course "Data Science". You can find the weekly exercises for the practical sessions in the menu above.
-
-Further information about this course are found on [Canvas](https://canvas.eur.nl/courses//55946).
+This manual website contains all instructions and the important study materials for the course "Data Science". Further information about this course are found on [Canvas](https://canvas.eur.nl/courses//55946).
 
 ## Schedule
 
@@ -86,3 +84,22 @@ lecture <- function(week) {
 
 
 Exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
+
+
+# QMD files
+
+You can dowload the Quarto-Markdown (.qmd) files for the practical sessions and change and process them in RStudio.
+```{r}
+#| output: asis
+#| echo: false
+cat("<ul>")
+for (i in 1:visible_practicals)
+{
+  cat(paste0("<li><a href=\"practicals/data_science_week", i, ".qmd\">Week ", i, "</a></li>"))
+}
+cat("</ul>")
+```
+
+# Lecture slides
+
+*-- coming soon --*

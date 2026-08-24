@@ -16,9 +16,6 @@ join:
 	cp -r r_basics/_book _build/r_basics
 	# qmd_downloads: mv qmds to qmd folder in _slides
 	cp -r manual/practicals/ _build/qmd/
-	cd _build/qmd; \
-	tree . -P "*.qmd" -H "." --noreport --charset utf-8 \
-			-T "Quarto files for tutorial sessions" > index.html
 
 install_requirements:
 	Rscript -e 'options(repos = c(CRAN = "https://cran.uni-muenster.de"))' \
