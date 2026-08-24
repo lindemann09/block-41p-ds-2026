@@ -1,12 +1,6 @@
 ---
 title: "Week 3: Parameter Estimation"
 subtitle:  "Basic Methods & Maximum Likelihood"
-format:
-  html:
-    toc: true
-    code-fold: false
-execute:
-  warning: false
 ---
 
 ## Before you start

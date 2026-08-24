@@ -54,7 +54,7 @@ lecture_tile= c(
 ## week link
 practical <- function(week) {
   if (week <= visible_practicals) {
-    return(paste0("[", practical_title[week], "](practicals/data_science_week", week, ".qmd)"))
+    return(paste0("[", practical_title[week], "](practicals/data_science_week", week, ".Rmd)"))
   } else {
     return(practical_title[week])
   }
@@ -86,16 +86,16 @@ lecture <- function(week) {
 Exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
 
 
-# QMD files
+# RMD files
 
-You can dowload the Quarto-Markdown (.qmd) files for the practical sessions and change and process them in RStudio.
+You can download the R-Markdown (.Rmd) files for the practical sessions and change and process them in RStudio.
 ```{r}
 #| output: asis
 #| echo: false
 cat("<ul>")
 for (i in 1:visible_practicals)
 {
-  cat(paste0("<li><a href=\"practicals/data_science_week", i, ".qmd\">Week ", i, "</a></li>"))
+  cat(paste0("<li><a href=\"rmd/data_science_week", i, ".Rmd\">Week ", i, "</a></li>"))
 }
 cat("</ul>")
 ```

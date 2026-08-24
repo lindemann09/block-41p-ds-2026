@@ -1,12 +1,6 @@
 ---
 title: "Week 4: Neural Networks 1"
 subtitle: "Generalizing the Perceptron and the Delta Rule"
-format:
-  html:
-    toc: true
-    code-fold: false
-execute:
-  warning: false
 ---
 
 ## Before you start
