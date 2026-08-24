@@ -22,7 +22,7 @@ join:
 
 install_requirements:
 	Rscript -e 'options(repos = c(CRAN = "https://cran.uni-muenster.de"))' \
-			-e ' install.packages(c("rmarkdown", "knitr", "tidyverse", "webexercises", "praise"))'
+			-e ' install.packages(c("bslib","rmarkdown", "knitr", "tidyverse", "webexercises", "praise"))'
 
 clean:
 	rm -Rf _build
