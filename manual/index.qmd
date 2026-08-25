@@ -37,8 +37,8 @@ lecture_tile= c(
   "Parameter Estimation (YM)",
   "Neural Networks 1 (YM)",
   "Neural Networks 2 (YM)",
-  "Cognitive Models in Psychology (OL)",
-  "Random Walk Methods (OL)",
+  "Process Models in Cognitive Psychology (OL)",
+  "Multinomial Processing Tree Models (OL)",
   "Reaction Time Models (OL)",
   "Q & A Lecture (YM,OL)")
 
