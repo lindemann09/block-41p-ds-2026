@@ -85,19 +85,29 @@ lecture <- function(week) {
 Exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
 
 
-# RMD files
+# Rmd files
 
-You can download the R-Markdown (.Rmd) files for the practical sessions and change and process them in RStudio.
+You can download the R-Markdown (.Rmd) files with the exercises for the practical sessions. You can open these files in RStudio and make changes.
+
 ```{r}
 #| output: asis
 #| echo: false
-cat("<ul>")
 for (i in 1:visible_practicals)
 {
-  cat(paste0("<li><a href=\"rmd/data_science_week", i, ".Rmd\">Week ", i, "</a></li>"))
+  cat(paste0("<a href=\"rmd/data_science_week", i, ".Rmd\">Rmd Week ", i, "</a>&nbsp;&nbsp;&nbsp;&nbsp;"))
 }
-cat("</ul>")
+cat("</br>")
 ```
+
+**Solutions**
+
+*-- coming soon --*
+
+<!--
+[Week 1](rmd/data_science_week1_solution.Rmd) &nbsp;&nbsp;&nbsp;&nbsp;
+[Week 2](rmd/data_science_week2_solution.Rmd) &nbsp;&nbsp;&nbsp;&nbsp;
+-->
+
 
 # Lecture slides
 
