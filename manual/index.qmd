@@ -35,10 +35,9 @@ practical_title = c(
   "Parameter Estimation",
   "Neural Networks 1",
   "Neural Networks 2",
-  "Cognitive Models in Psychology",
-  "Cognitive Models I",
-  "Cognitive Models II",
-  "Cognitive Models III")
+  "Cognitive Models 1",
+  "Cognitive Models 2",
+  "Cognitive Models 3")
 
 lecture_tile= c(
   "Introduction to Data Science (OL,YM)",
