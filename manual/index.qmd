@@ -1,16 +1,9 @@
 ---
 title: "Block 4.1 Practical: Data Science "
-subtitle: "Erasmus Univeristy Rotterdam"
+subtitle: "Erasmus University Rotterdam"
 author:
   - name: "Oliver Lindemann (OL)"
   - name: "Yaniv Morgenstern (YM)"
-
-format:
-  html:
-    toc: true
-    code-fold: false
-execute:
-  warning: false
 ---
 
 This online course manual that contains all instructions and the important study materials for the course "Data Science". Further information about this course are found on [Canvas](https://canvas.eur.nl/courses//55946).
