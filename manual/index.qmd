@@ -22,37 +22,38 @@ This online course manual that contains all instructions and the important study
 
 ```{r}
 #| echo: false
-week <- function(x) {
-  w = as.Date('1.9.2026',format='%d.%m.%Y') + 7*(x-1)
-  txt = format(w, format = "%d/%m")
-  return(txt)
-}
 
 # linked materials
 visible_practicals = 2
+visible_solutions = 0
 visible_lectures = 1
 
 practical_title = c(
-  "Getting Started with R I",
-  "Getting Started with R II",
+  "Introduction 1: R basics",
+  "Introduction 2: R basics",
   "Parameter Estimation",
   "Neural Networks 1",
   "Neural Networks 2",
-  "Cognitive Models 1",
-  "Cognitive Models 2",
-  "Cognitive Models 3")
+  "Cognitive Modelling",
+  "Multinomial Processing Tree Models",
+  "Reaction Time Models")
 
 lecture_tile= c(
   "Introduction to Data Science",
   "Parameter Estimation",
   "Neural Networks 1",
   "Neural Networks 2",
-  "Process Models in Cognitive Psychology",
+  "Cognitive Modelling",
   "Multinomial Processing Tree Models",
   "Reaction Time Models",
   "Q & A Lecture")
 
-## week link
+## week links
+week <- function(x) {
+  w = as.Date('1.9.2026',format='%d.%m.%Y') + 7*(x-1)
+  txt = format(w, format = "%d/%m")
+  return(txt)
+}
 practical <- function(week) {
   if (week <= visible_practicals) {
     return(paste0("[", practical_title[week], "](practicals/data_science_week", week, ".Rmd)"))
@@ -60,7 +61,6 @@ practical <- function(week) {
     return(practical_title[week])
   }
 }
-
 lecture <- function(week) {
   if (week <= visible_lectures) {
     return(paste0("[", lecture_tile[week], "](slides/ds_lecture", week, ".pdf)"))
@@ -69,8 +69,6 @@ lecture <- function(week) {
     return(lecture_tile[week])
   }
 }
-
-
 ```
 
 | Week        | Topic | Tutorial   (11:00) | Lecture (13:00)         |
@@ -97,18 +95,24 @@ You can download the R-Markdown (.Rmd) files with the exercises for the practica
 #| echo: false
 for (i in 1:visible_practicals)
 {
-  cat(paste0("<a href=\"rmd/data_science_week", i, ".Rmd\">Rmd Week ", i, "</a>&nbsp;&nbsp;&nbsp;&nbsp;"))
+  cat(paste0("[Rmd Week ", i, "](rmd/data_science_week", i, ".Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
 }
 cat("</br>")
 ```
 
 **Solutions**
 
-*-- coming soon --*
-
-<!--
-[Week 1](rmd/data_science_week1_solution.Rmd) &nbsp;&nbsp;&nbsp;&nbsp;
-[Week 2](rmd/data_science_week2_solution.Rmd) &nbsp;&nbsp;&nbsp;&nbsp;
--->
-
+```{r}
+#| output: asis
+#| echo: false
+if (visible_solutions == 0) {
+  cat("*-- coming soon --*")
+} else {
+  for (i in 1:visible_solutions)
+  {
+    cat(paste0("[Solution Week ", i, "](practicals/data_science_week", i, "_solution.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
+  }
+}
+cat("</br>")
+```
 

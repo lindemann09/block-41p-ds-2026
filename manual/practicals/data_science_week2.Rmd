@@ -1,5 +1,5 @@
 ---
-title: "Practical 2: R Exercises II"
+title: "Practical 2: Introduction 2"
 subtitle: "Functions, Control Flow, Matrices, and Vectorization"
 output:
   html_document:

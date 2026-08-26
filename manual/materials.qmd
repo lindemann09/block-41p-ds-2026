@@ -1,22 +1,25 @@
-## Literature
+## Suggested Readings
 
-The course is primarily based on the text book:
+1. **Introduction 1: R Basics**
+    * [R mini tutorial](r_basics/index.html)
+
+2. **Introduction 2: R Basics**
+    * [R mini tutorial](r_basics/index.html)
+
+3. **Parameter Estimation**
+    * Chapter 2 of Farrell & Lewandowsky (2018)
+
+*The list is not complete and will be updated during the course.*
+
+## Literature
 
 * Farrell, S., & Lewandowsky, S. (2018). *Computational modeling of cognition and behavior.* Cambridge University Press. [eBook](https://eur.on.worldcat.org/oclc/1028902356)
 
-Note: Book chapters and articles are only accessible from the university campus. To access these materials from home, you need to set up a
-[VPN connection (on-campus simulation)](https://www.eur.nl/en/library/using-library/access-online-collection).
+The links above point to the online resources of the literature. Books and articles that are not listed here can be downloaded from the Canvas page.
 
+Please note that some of the references are only accessible from the university campus. To access these materials from home, you need to set up a [VPN connection (on-campus simulation)](https://www.eur.nl/en/library/using-library/access-online-collection).
+The course is primarily based on the text book:
 
-**References**
-
-::: {#refs}
-:::
-
-
-## R Introduction
-
-This [R mini tutorial](r_basics/index.html) is a short introduction to the programming language R. It is designed for students of the course *Data Science* and provides a basic understanding of R programming.
 
 ## Additional Material
 

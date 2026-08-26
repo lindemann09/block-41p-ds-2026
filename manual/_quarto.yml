@@ -20,7 +20,7 @@ website:
     - text: "R Mini Tutorial"
       href: r_basics/index.html
 
-    - text: "Materials"
+    - text: "Readings & Materials"
       href: materials.qmd
 
   page-footer:
