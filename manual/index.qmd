@@ -6,7 +6,17 @@ author:
   - name: "Yaniv Morgenstern (YM)"
 ---
 
+
+
+::: {.columns}
+::: {.column style='width: 60%; text-align: left;' }
 This online course manual that contains all instructions and the important study materials for the course "Data Science". Further information about this course are found on [Canvas](https://canvas.eur.nl/courses//55946).
+:::
+::: {.column style='width: 40%;'}
+![](incl/datascience_logo.png)
+:::
+:::
+
 
 ## Schedule
 
@@ -20,7 +30,7 @@ week <- function(x) {
 
 # linked materials
 visible_practicals = 2
-visible_lectures = 0
+visible_lectures = 1
 
 practical_title = c(
   "Getting Started with R I",
@@ -33,14 +43,14 @@ practical_title = c(
   "Cognitive Models 3")
 
 lecture_tile= c(
-  "Introduction to Data Science (OL,YM)",
-  "Parameter Estimation (YM)",
-  "Neural Networks 1 (YM)",
-  "Neural Networks 2 (YM)",
-  "Process Models in Cognitive Psychology (OL)",
-  "Multinomial Processing Tree Models (OL)",
-  "Reaction Time Models (OL)",
-  "Q & A Lecture (YM,OL)")
+  "Introduction to Data Science",
+  "Parameter Estimation",
+  "Neural Networks 1",
+  "Neural Networks 2",
+  "Process Models in Cognitive Psychology",
+  "Multinomial Processing Tree Models",
+  "Reaction Time Models",
+  "Q & A Lecture")
 
 ## week link
 practical <- function(week) {
@@ -53,8 +63,9 @@ practical <- function(week) {
 
 lecture <- function(week) {
   if (week <= visible_lectures) {
-    return(paste0("[", lecture_tile[week], "](lectures/lecture", week, ".pdf)"))
+    return(paste0("[", lecture_tile[week], "](slides/ds_lecture", week, ".pdf)"))
   } else {
+
     return(lecture_tile[week])
   }
 }
@@ -62,16 +73,16 @@ lecture <- function(week) {
 
 ```
 
-| Week        | Topic | Tutorial   (11:00) | Lecture (13:00) |
-| ----------- | ----- | ------------------ | --------------- |
-| `r week(1)` | 1     | `r practical(1)`   | `r lecture(1)`  |
-| `r week(2)` | 2     | `r practical(2)`   | `r lecture(2)`  |
-| `r week(3)` | 3     | `r practical(3)`   | `r lecture(3)`  |
-| `r week(4)` | 4     | `r practical(4)`   | `r lecture(4)`  |
-| `r week(5)` | 5     | `r practical(5)`   | `r lecture(5)`  |
-| `r week(6)` | 6     | `r practical(6)`   | `r lecture(6)`  |
-| `r week(7)` | 7     | `r practical(7)`   | `r lecture(7)`  |
-| `r week(8)` | 8     | `r practical(8)`   | `r lecture(8)`  |
+| Week        | Topic | Tutorial   (11:00) | Lecture (13:00)         |
+| ----------- | ----- | ------------------ | ----------------------- |
+| `r week(1)` | 1     | `r practical(1)`   | `r lecture(1)`  (OL,YM) |
+| `r week(2)` | 2     | `r practical(2)`   | `r lecture(2)`  (YM)    |
+| `r week(3)` | 3     | `r practical(3)`   | `r lecture(3)`  (YM)    |
+| `r week(4)` | 4     | `r practical(4)`   | `r lecture(4)`  (YM)    |
+| `r week(5)` | 5     | `r practical(5)`   | `r lecture(5)`  (OL)    |
+| `r week(6)` | 6     | `r practical(6)`   | `r lecture(6)`  (OL)    |
+| `r week(7)` | 7     | `r practical(7)`   | `r lecture(7)`  (OL)    |
+| `r week(8)` | 8     | `r practical(8)`   | `r lecture(8)`  (YM,OL) |
 
 
 Exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
@@ -101,6 +112,3 @@ cat("</br>")
 -->
 
 
-# Lecture slides
-
-*-- coming soon --*
