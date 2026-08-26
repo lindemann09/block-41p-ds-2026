@@ -116,7 +116,7 @@ Compare `fit_rmsd$par` and `fit_mle$par`. Then think about *why* they might diff
 
 A dataset you didn't generate yourself can only tell you whether your fitting method finds *some* consistent minimum — not whether that minimum is actually the *true* parameters. Simulating your own data, with known "true" values, lets you check that.
 
-```{r}
+```{r,  eval=FALSE}
 set.seed(99)
 contrast_sim <- seq(0, 1, 0.12)
 true_alpha <- 0.5
