@@ -2,7 +2,7 @@
 
 The course is primarily based on the text book:
 
-* Farrell, S., & Lewandowsky, S. (2018). *Computational modeling of cognition and behavior.* Cambridge University Press.
+* Farrell, S., & Lewandowsky, S. (2018). *Computational modeling of cognition and behavior.* Cambridge University Press. [eBook](https://eur.on.worldcat.org/oclc/1028902356)
 
 Note: Book chapters and articles are only accessible from the university campus. To access these materials from home, you need to set up a
 [VPN connection (on-campus simulation)](https://www.eur.nl/en/library/using-library/access-online-collection).
