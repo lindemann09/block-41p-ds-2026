@@ -47,13 +47,13 @@ Looking at the plot above, write down your own rough guess for `alpha` and `beta
 
 ## Part 2: How wrong is a guess? — RMSD
 
-### Exercise 2 
+### Exercise 2
 
 Copy in `psychometric_model()` and `rmsd()` from the lecture (unchanged), then try your Exercise 1 guess alongside a couple of others.
 
 ```{r}
 # Your code here:
-# - psychometric_model <- function(alpha, beta, x) { ... } 
+# - psychometric_model <- function(alpha, beta, x) { ... }
 # - rmsd <- function(params, data) { ... }
 # - try rmsd() on your own guess and 1-2 others, using data$contrast and data$prop_correct
 
@@ -61,7 +61,7 @@ Copy in `psychometric_model()` and `rmsd()` from the lecture (unchanged), then t
 
 ## Part 3: Grid search
 
-### Exercise 3 
+### Exercise 3
 
 Build a grid of candidate `(alpha, beta)` pairs and find the best-fitting combination. `alpha` should range across roughly the same interval as `contrast` itself (contrast only goes up to 1, so there's no reason to search alpha values far outside that range); `beta` can range more widely.
 
@@ -108,7 +108,7 @@ Write `nll()` (negative log-likelihood), matching the lecture's version — reme
 
 ```
 
-### Exercise 7 (Discussion) 
+### Exercise 7 (Discussion)
 
 Compare `fit_rmsd$par` and `fit_mle$par`. Then think about *why* they might differ, even slightly: RMSD treats a miss of a given size the same everywhere on the curve, while likelihood treats a miss near the edges of the range (close to 0.5 or close to 1) very differently from the same-sized miss near the middle. Can you think of a situation where this difference would actually matter for which model you'd trust more?
 
@@ -117,6 +117,8 @@ Compare `fit_rmsd$par` and `fit_mle$par`. Then think about *why* they might diff
 A dataset you didn't generate yourself can only tell you whether your fitting method finds *some* consistent minimum — not whether that minimum is actually the *true* parameters. Simulating your own data, with known "true" values, lets you check that.
 
 ```{r}
+#| eval=FALSE
+
 set.seed(99)
 contrast_sim <- seq(0, 1, 0.12)
 true_alpha <- 0.5
@@ -132,7 +134,7 @@ data_sim <- data.frame(contrast = contrast_sim, n_correct = n_correct_sim,
 data_sim
 ```
 
-### Exercise 8 
+### Exercise 8
 
 Fit `data_sim` with `optim()` and RMSD, starting from `alpha = 0.3, beta = 1` as before.
 
@@ -141,7 +143,7 @@ Fit `data_sim` with `optim()` and RMSD, starting from `alpha = 0.3, beta = 1` as
 
 ```
 
-### Exercise 9 
+### Exercise 9
 
 Compare your fitted `(alpha, beta)` to `true_alpha`/`true_beta`. How close did you get?
 
@@ -150,7 +152,7 @@ Compare your fitted `(alpha, beta)` to `true_alpha`/`true_beta`. How close did y
 
 ```
 
-### Exercise 10 
+### Exercise 10
 
 Plot `data_sim`'s points, and overlay your fitted curve.
 
@@ -162,7 +164,7 @@ Plot `data_sim`'s points, and overlay your fitted curve.
 
 ```
 
-### Exercise 11 (Interpretation) 
+### Exercise 11 (Interpretation)
 
 Compare this simulated participant's fitted `alpha` to the real Part 0–5 participant's `fit_rmsd$par`. Which participant is more *sensitive* overall (reaches a given detection level at lower contrast)? Which participant's responses are more *reliable* around their own threshold (steeper `beta`)? These are two genuinely separate psychological questions — a participant can be sensitive but inconsistent, or insensitive but very reliable in their own way.
 
@@ -181,7 +183,7 @@ Write `linear_model(a, b, x)`, returning `a + b * x`.
 
 ```
 
-### Exercise 14 
+### Exercise 14
 
 Write `rmsd_linear()`, analogous to `rmsd()` but using `linear_model()`.
 
@@ -190,7 +192,7 @@ Write `rmsd_linear()`, analogous to `rmsd()` but using `linear_model()`.
 
 ```
 
-### Exercise 15 
+### Exercise 15
 
 Fit the linear model to the original `data` (not `data_sim`) with `optim()`. A reasonable starting point is `a = 0.5, b = 0.5`.
 
@@ -199,7 +201,7 @@ Fit the linear model to the original `data` (not `data_sim`) with `optim()`. A r
 
 ```
 
-### Exercise 16 
+### Exercise 16
 
 Compare `fit_linear$value` to `fit_rmsd$value`. Which model fits better by this measure?
 
@@ -208,7 +210,7 @@ Compare `fit_linear$value` to `fit_rmsd$value`. Which model fits better by this 
 
 ```
 
-### Exercise 17 
+### Exercise 17
 
 Plot both fitted curves over the data, extending `ylim` a bit beyond $$0, 1$$ so any out-of-bounds predictions are visible (e.g. `ylim = c(-0.2, 1.2)`).
 
@@ -233,7 +235,7 @@ forgetting_data <- data.frame(time_days, prop_recalled)
 forgetting_data
 ```
 
-### Exercise 19 
+### Exercise 19
 
 Plot `prop_recalled` against `time_days`. What shape is this — does it look like it could be described by the same S-shaped Weibull curve from Part 0–7, or does it look different?
 
@@ -242,7 +244,7 @@ Plot `prop_recalled` against `time_days`. What shape is this — does it look li
 
 ```
 
-### Exercise 20 
+### Exercise 20
 
 We'll model this with a classic two-parameter exponential forgetting curve:
 
@@ -255,7 +257,7 @@ Here `a` is the (estimated) proportion recalled at time zero, right after learni
 
 ```
 
-### Exercise 21 
+### Exercise 21
 
 Write `rmsd_forgetting()`, analogous to `rmsd()` from Part 2, and fit it with `optim()`. A reasonable starting point is `a = 0.9, b = 0.05`.
 
@@ -264,7 +266,7 @@ Write `rmsd_forgetting()`, analogous to `rmsd()` from Part 2, and fit it with `o
 
 ```
 
-### Exercise 22 
+### Exercise 22
 
 Here's the actual inference question: **how many days pass before recall drops to 0.8 (80% correct)?** Your fitted model gives you `a` and `b` — you're not given this answer directly, you have to derive it. Setting $p(t) = 0.8$ and solving for $t$:
 
