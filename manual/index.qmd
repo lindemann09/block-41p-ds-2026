@@ -38,7 +38,7 @@ practical_title = c(
   "Multinomial Processing Tree Models",
   "Reaction Time Models")
 
-lecture_tile= c(
+lecture_title= c(
   "Introduction to Data Science",
   "Parameter Estimation",
   "Neural Networks 1",
@@ -63,10 +63,10 @@ practical <- function(week) {
 }
 lecture <- function(week) {
   if (week <= visible_lectures) {
-    return(paste0("[", lecture_tile[week], "](slides/ds_lecture", week, ".pdf)"))
+    return(paste0("[", lecture_title[week], "](slides/ds_lecture", week, ".pdf)"))
   } else {
 
-    return(lecture_tile[week])
+    return(lecture_title[week])
   }
 }
 ```
