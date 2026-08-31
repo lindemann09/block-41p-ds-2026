@@ -1,56 +1,72 @@
 ---
 title: "Block 4.1 Practical: Data Science "
-subtitle: "Erasmus Univeristy Rotterdam"
+subtitle: "Erasmus University Rotterdam"
 author:
   - name: "Oliver Lindemann (OL)"
   - name: "Yaniv Morgenstern (YM)"
-
-format:
-  html:
-    toc: true
-    code-fold: false
-execute:
-  warning: false
 ---
 
+
+
+::: {.columns}
+::: {.column style='width: 60%; text-align: left;' }
 This online course manual that contains all instructions and the important study materials for the course "Data Science". Further information about this course are found on [Canvas](https://canvas.eur.nl/courses//55946).
+:::
+::: {.column style='width: 40%;'}
+![](incl/datascience_logo.png)
+:::
+:::
+
 
 ## Schedule
 
 ```{r}
 #| echo: false
+
+# linked materials
+visible_practicals = 2
+visible_solutions = 0
+visible_lectures = 1
+
+practical_title = c(
+  "Introduction 1: R basics",
+  "Introduction 2: R basics",
+  "Parameter Estimation",
+  "Neural Networks 1",
+  "Neural Networks 2",
+  "Cognitive Modelling",
+  "Multinomial Processing Tree Models",
+  "Reaction Time Models")
+
+lecture_title= c(
+  "Introduction to Data Science",
+  "Parameter Estimation",
+  "Neural Networks 1",
+  "Neural Networks 2",
+  "Cognitive Modelling",
+  "Multinomial Processing Tree Models",
+  "Reaction Time Models",
+  "Q & A Lecture")
+
+# practical rooms
+practical_room = c(
+  "2.02", #1
+  "2.02", #8
+  "4.02", #15
+  "4.02", #22
+  "1.12", #29
+  "3.14", #6
+  "2.20", #13
+  "2.02" #20
+)
+
+## week links
 week <- function(x) {
   w = as.Date('1.9.2026',format='%d.%m.%Y') + 7*(x-1)
   txt = format(w, format = "%d/%m")
   return(txt)
 }
 
-# linked materials
-visible_practicals = 2
-visible_lectures = 0
-
-practical_title = c(
-  "Getting Started with R I",
-  "Getting Started with R II",
-  "Parameter Estimation",
-  "Neural Networks 1",
-  "Neural Networks 2",
-  "Cognitive Models in Psychology",
-  "Cognitive Models I",
-  "Cognitive Models II",
-  "Cognitive Models III")
-
-lecture_tile= c(
-  "Introduction to Data Science (OL,YM)",
-  "Parameter Estimation (YM)",
-  "Neural Networks 1 (YM)",
-  "Neural Networks 2 (YM)",
-  "Cognitive Models in Psychology (OL)",
-  "Random Walk Methods (OL)",
-  "Reaction Time Models (OL)",
-  "Q & A Lecture (YM,OL)")
-
-## week link
 practical <- function(week) {
   if (week <= visible_practicals) {
     return(paste0("[", practical_title[week], "](practicals/data_science_week", week, ".Rmd)"))
@@ -59,30 +75,35 @@ practical <- function(week) {
   }
 }
 
-lecture <- function(week) {
-  if (week <= visible_lectures) {
-    return(paste0("[", lecture_tile[week], "](lectures/lecture", week, ".pdf)"))
-  } else {
-    return(lecture_tile[week])
-  }
+room <- function(week) {
+  return(practical_room[week])
 }
 
-
+lecture <- function(week) {
+  if (week <= visible_lectures) {
+    return(paste0("[", lecture_title[week], "](slides/ds_lecture", week, ".pdf)"))
+  } else {
+    return(lecture_title[week])
+  }
+}
 ```
 
-| Week        | Topic | Tutorial   (11:00) | Lecture (13:00) |
-| ----------- | ----- | ------------------ | --------------- |
-| `r week(1)` | 1     | `r practical(1)`   | `r lecture(1)`  |
-| `r week(2)` | 2     | `r practical(2)`   | `r lecture(2)`  |
-| `r week(3)` | 3     | `r practical(3)`   | `r lecture(3)`  |
-| `r week(4)` | 4     | `r practical(4)`   | `r lecture(4)`  |
-| `r week(5)` | 5     | `r practical(5)`   | `r lecture(5)`  |
-| `r week(6)` | 6     | `r practical(6)`   | `r lecture(6)`  |
-| `r week(7)` | 7     | `r practical(7)`   | `r lecture(7)`  |
-| `r week(8)` | 8     | `r practical(8)`   | `r lecture(8)`  |
+*Note: In the first week, the lecture is at 11:00 and a practical at 13:00.*
 
 
-Exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
+| Date        | Topic | Room        | Practical   (11:00) | Lecture (13:00)         |
+| ----------- | :---: | ----------- | ------------------- | ----------------------- |
+| `r week(1)` |   1   | `r room(1)` | `r practical(1)`    | `r lecture(1)`  (OL,YM) |
+| `r week(2)` |   2   | `r room(2)` | `r practical(2)`    | `r lecture(2)`  (YM)    |
+| `r week(3)` |   3   | `r room(3)` | `r practical(3)`    | `r lecture(3)`  (YM)    |
+| `r week(4)` |   4   | `r room(4)` | `r practical(4)`    | `r lecture(4)`  (YM)    |
+| `r week(5)` |   5   | `r room(5)` | `r practical(5)`    | `r lecture(5)`  (OL)    |
+| `r week(6)` |   6   | `r room(6)` | `r practical(6)`    | `r lecture(6)`  (OL)    |
+| `r week(7)` |   7   | `r room(7)` | `r practical(7)`    | `r lecture(7)`  (OL)    |
+| `r week(8)` |   8   | `r room(8)` | `r practical(8)`    | `r lecture(8)`  (YM,OL) |
+
+
+All tutorials find place in the **Langeveld** build. Please look at your timetable for the lecture halls. The exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
 
 
 # Rmd files
@@ -94,21 +115,24 @@ You can download the R-Markdown (.Rmd) files with the exercises for the practica
 #| echo: false
 for (i in 1:visible_practicals)
 {
-  cat(paste0("<a href=\"rmd/data_science_week", i, ".Rmd\">Rmd Week ", i, "</a>&nbsp;&nbsp;&nbsp;&nbsp;"))
+  cat(paste0("[Rmd Week ", i, "](rmd/data_science_week", i, ".Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
 }
 cat("</br>")
 ```
 
 **Solutions**
 
-*-- coming soon --*
+```{r}
+#| output: asis
+#| echo: false
+if (visible_solutions == 0) {
+  cat("*-- coming soon --*")
+} else {
+  for (i in 1:visible_solutions)
+  {
+    cat(paste0("[Solution Week ", i, "](practicals/data_science_week", i, "_solution.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
+  }
+}
+cat("</br>")
+```
 
-<!--
-[Week 1](rmd/data_science_week1_solution.Rmd) &nbsp;&nbsp;&nbsp;&nbsp;
-[Week 2](rmd/data_science_week2_solution.Rmd) &nbsp;&nbsp;&nbsp;&nbsp;
--->
-
-
-# Lecture slides
-
-*-- coming soon --*

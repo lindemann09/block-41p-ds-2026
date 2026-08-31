@@ -1,13 +1,9 @@
 ---
-title: "Practical 1: R Exercises I"
+title: "Practical 1: Introduction 1"
 subtitle: "The R Basics"
 output:
   html_document:
     toc: true
-format:
-  html:
-    toc: true
-    toc-expand: 2
 ---
 
 ## Before you start

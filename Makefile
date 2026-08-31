@@ -1,20 +1,17 @@
-.PHONY: manual r_basics
+.PHONY: manual
 
-all: manual r_basics join
+all: manual
 
 manual:
+	## manual website
 	quarto render manual --to html
-
-## R basics tutorial
-r_basics:
+	## R basics tutorial
 	quarto render r_basics/
-
-## joining manual, r_basics and practical rmd-files
-join:
+	## joining manual, r_basics and practical rmd-files
 	mkdir -p _build
 	cp -r manual/_site/* _build/
 	cp -r r_basics/_book _build/r_basics
-	# rmd_downloads: mv rmds to rmd folder in _slides
+	# make rmd_downloads
 	cp -r manual/practicals/ _build/rmd/
 
 install_requirements:
