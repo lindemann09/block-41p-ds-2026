@@ -19,8 +19,7 @@ Please note that some of the references are only accessible from the university 
     - Hinton, G. E. (1992). How neural networks learn from experience. Scientific American, 267(3), 144-151.
     - Prince, S. J. D. (2023). Shallow neural networks. In [Understanding Deep Learning](https://udlbook.github.io/udlbook/) (pp. 25–40). MIT Press.
 5.  **Neural Networks 2**
-
-- Section 13.2 (backpropogation) of Farrell & Lewadowsky (2018)
+    - Section 13.2 (backpropogation) of Farrell & Lewadowsky (2018)
 
 *The list is not complete and will be updated during the course.*
 
