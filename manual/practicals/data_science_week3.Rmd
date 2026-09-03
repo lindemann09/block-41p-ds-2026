@@ -1,6 +1,6 @@
 ---
-title: "Week 3: Supervised Learning \ Parameter Estimation"
-subtitle:  "Basic Methods & Maximum Likelihood"
+title: "Practical 3: Supervised Learning"
+subtitle: "Basic Methods for Fitting a Model to Data"
 output:
   html_document:
     toc: true
@@ -8,17 +8,33 @@ format:
   html:
     toc: true
     toc-expand: 2
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ## Before you start
 
-In the lecture you fit a Weibull-based psychometric function to 2AFC contrast-detection data using both RMSD and maximum likelihood. This practical has you rebuild the whole pipeline yourself, then use it in three different ways: recovering known parameters from simulated data, comparing the Weibull model against a plain linear model, and — a new, optional section at the end — fitting a completely different psychometric curve (a forgetting curve) and using the fitted model to answer a real question, not just report a fit.
+In the lecture you fit a Weibull-based psychometric function to 2AFC
+contrast-detection data using RMSD. This practical has you use that same
+pipeline in three different ways: recovering known parameters from
+simulated data, comparing the Weibull model against a plain linear
+model, and fitting a completely different psychometric curve (a
+forgetting curve) and using the fitted model to answer a real question,
+not just report a fit.
 
-You don't need to understand every line of R syntax perfectly — focus on understanding *what each step is doing conceptually*. If something errors, re-check you've run all the chunks above it in order.
+Most of the code below is already written for you. Your job in each
+exercise is usually to **run it, then change something** — a parameter
+value, a data value, a starting point — and see what happens. You don't
+need to understand every line of R syntax perfectly; focus on
+understanding *what changing that one value actually does*. If something
+errors, re-check you've run all the chunks above it in order.
 
 ## Part 0: The data
 
-Same 2AFC contrast-detection setup as the lecture: on each trial, a participant says which of two intervals contained the stimulus, at one of nine contrast levels, 40 trials per level.
+Same 2AFC contrast-detection setup as the lecture: on each trial, a
+participant says which of two intervals contained the stimulus, at one
+of nine contrast levels, 40 trials per level.
 
 ```{r}
 contrast <- seq(0, 1, 0.12)
@@ -43,82 +59,112 @@ par(old_par)
 
 ### Exercise 1
 
-Looking at the plot above, write down your own rough guess for `alpha` and `beta` — where does the curve look like it crosses roughly 75% correct (`alpha`), and how steep does the rise look (`beta`)? There's no single right answer here; this is just a benchmark to compare against later.
+Looking at the plot above, write down your own rough guess for `alpha`
+and `beta` — where does the curve look like it crosses roughly 75%
+correct (`alpha`), and how steep does the rise look (`beta`)? There's no
+single right answer here; this is just a benchmark to compare against
+later.
 
 ## Part 2: How wrong is a guess? — RMSD
 
-### Exercise 2
-
-Copy in `psychometric_model()` and `rmsd()` from the lecture (unchanged), then try your Exercise 1 guess alongside a couple of others.
+Here are `psychometric_model()` and `rmsd()`, exactly as covered in the
+lecture:
 
 ```{r}
-# Your code here:
-# - psychometric_model <- function(alpha, beta, x) { ... }
-# - rmsd <- function(params, data) { ... }
-# - try rmsd() on your own guess and 1-2 others, using data$contrast and data$prop_correct
+psychometric_model <- function(alpha, beta, x) {
+  y <- rep(0, length(x))
+  valid <- x >= 0
+  y[valid] <- 0.5 + 0.5*(1 - exp(-(x[valid] / alpha)^beta))
+  y
+}
 
+rmsd <- function(params, data) {
+  alpha <- params[1]; beta <- params[2]
+  predicted <- psychometric_model(alpha, beta, data$contrast)
+  sqrt(mean((data$prop_correct - predicted)^2))
+}
 ```
+
+### Exercise 2
+
+Try `rmsd()` on your own Exercise 1 guess:
+
+```{r}
+rmsd(c(alpha = 0.5, beta = 3), data)   # replace 0.5 and 3 with your own guess
+```
+
+Now try a few more combinations by changing the numbers above and
+re-running — including at least one combination you're confident is a
+*bad* fit. Does `rmsd()` give a clearly higher number for it, as you'd
+expect?
 
 ## Part 3: Grid search
 
-### Exercise 3
-
-Build a grid of candidate `(alpha, beta)` pairs and find the best-fitting combination. `alpha` should range across roughly the same interval as `contrast` itself (contrast only goes up to 1, so there's no reason to search alpha values far outside that range); `beta` can range more widely.
-
-*Hint:* `alpha_vals <- seq(0.01, 1, length.out = 100)` (starting just above 0, not exactly 0, to avoid a division-by-zero inside the model) and `beta_vals <- seq(0.1, 6, length.out = 100)` are reasonable ranges to start from.
+Here's a grid search over candidate `(alpha, beta)` pairs:
 
 ```{r}
-# Your code here:
-# - alpha_vals, beta_vals, grid <- expand.grid(...)
-# - grid$rmsd <- apply(grid, 1, function(row) rmsd(row, data))
-# - best <- grid[which.min(grid$rmsd), ]
-
+alpha_vals <- seq(0.01, 1, length.out = 100)
+beta_vals <- seq(0.1, 6, length.out = 100)
+grid <- expand.grid(alpha = alpha_vals, beta = beta_vals)
+grid$rmsd <- apply(grid, 1, function(row) rmsd(row, data))
+best <- grid[which.min(grid$rmsd), ]
+best
 ```
+
+Here's what that whole grid looks like, all 10,000 combinations at once
+— darker means a better (lower-RMSD) fit:
+
+```{r}
+rmsd_matrix <- matrix(grid$rmsd, nrow = length(alpha_vals), ncol = length(beta_vals))
+image(alpha_vals, beta_vals, rmsd_matrix, xlab = "alpha", ylab = "beta",
+      main = "RMSD across the grid", col = hcl.colors(50, "Blues", rev = TRUE))
+contour(alpha_vals, beta_vals, rmsd_matrix, add = TRUE, nlevels = 8)
+points(best$alpha, best$beta, pch = 4, col = "red", lwd = 2, cex = 1.5)
+```
+
+The red X marks `best` — the single darkest point, exactly where the
+contour lines close in around a minimum. This is the same "cost surface"
+idea from the lecture, just for this dataset's own grid.
+
+### Exercise 3
+
+The range searched matters. Change `alpha_vals` above to
+`seq(0.7, 1, length.out = 50)` — a range that deliberately excludes
+where you'd expect the true best-fitting `alpha` to be — and re-run the
+whole chunk. What does `best` give you now? Is the reported RMSD better
+or worse than before? What does this tell you about grid search's
+biggest limitation: it can only ever report the best point *within the
+range you gave it*, with no way to warn you that a better answer might
+exist outside that range. (Change `alpha_vals` back to the original
+`seq(0.01, 1, length.out = 100)` before moving on.)
 
 ## Part 4: Automatic search with `optim()`
 
+```{r}
+fit_rmsd <- optim(par = c(alpha = 0.02, beta = 5.5), fn = rmsd, data = data)
+fit_rmsd$par
+fit_rmsd$value
+```
+
 ### Exercise 4
 
-Run `optim()` from a deliberately poor starting point — something like `alpha = 0.02, beta = 5.5` — and confirm it still finds essentially the same answer as your grid search.
+Change the starting point above — `par = c(alpha = 0.02, beta = 5.5)` —
+to a couple of other values of your choosing, and re-run. Does `optim()`
+still land on essentially the same answer every time? This particular
+starting point is a deliberately extreme one — the model's predictions
+are already flattened out to near-1.0 everywhere except `contrast = 0` —
+and it's worth noting `optim()` still finds its way to the right answer
+despite that. (Leave the chunk on this starting point, saved as
+`fit_rmsd`, before moving on — you'll need it later in the practical.)
+
+## Part 5: Simulating your own data
+
+A dataset you didn't generate yourself can only tell you whether your
+fitting method finds *some* consistent minimum — not whether that
+minimum is actually the *true* parameters. Simulating your own data,
+with known "true" values, lets you check that.
 
 ```{r}
-# Your code here
-
-```
-
-### Exercise 5
-
-Now run it from a more reasonable starting point (e.g. `alpha = 0.3, beta = 1`) and save the result as `fit_rmsd` — you'll need this later in the practical.
-
-```{r}
-# Your code here
-
-```
-
-## Part 5: Maximum likelihood
-
-### Exercise 6
-
-Write `nll()` (negative log-likelihood), matching the lecture's version — remember to clamp the predicted probability away from exactly 0 or 1 before passing it to `dbinom()`. Fit it with `optim()`, starting from the same point as Exercise 5, and save the result as `fit_mle`.
-
-```{r}
-# Your code here:
-# - nll <- function(params, data) { ... } with predicted <- pmin(pmax(predicted, 1e-6), 1 - 1e-6)
-# - fit_mle <- optim(par = c(alpha = 0.3, beta = 1), fn = nll, data = data)
-
-```
-
-### Exercise 7 (Discussion)
-
-Compare `fit_rmsd$par` and `fit_mle$par`. Then think about *why* they might differ, even slightly: RMSD treats a miss of a given size the same everywhere on the curve, while likelihood treats a miss near the edges of the range (close to 0.5 or close to 1) very differently from the same-sized miss near the middle. Can you think of a situation where this difference would actually matter for which model you'd trust more?
-
-## Part 6: Simulating your own data
-
-A dataset you didn't generate yourself can only tell you whether your fitting method finds *some* consistent minimum — not whether that minimum is actually the *true* parameters. Simulating your own data, with known "true" values, lets you check that.
-
-```{r}
-#| eval=FALSE
-
 set.seed(99)
 contrast_sim <- seq(0, 1, 0.12)
 true_alpha <- 0.5
@@ -134,151 +180,162 @@ data_sim <- data.frame(contrast = contrast_sim, n_correct = n_correct_sim,
 data_sim
 ```
 
-### Exercise 8
-
-Fit `data_sim` with `optim()` and RMSD, starting from `alpha = 0.3, beta = 1` as before.
-
 ```{r}
-# Your code here
+fit_sim <- optim(par = c(alpha = 0.3, beta = 1), fn = rmsd, data = data_sim)
+fit_sim$par                # compare this to true_alpha / true_beta above
+c(true_alpha = true_alpha, true_beta = true_beta)
 
+x_seq <- seq(0, 1, length.out = 200)
+plot(data_sim$contrast, data_sim$prop_correct, pch = 19,
+     xlab = "Contrast", ylab = "Proportion correct", ylim = c(0, 1))
+lines(x_seq, psychometric_model(fit_sim$par[1], fit_sim$par[2], x_seq), col = "blue")
 ```
 
-### Exercise 9
+### Exercise 5
 
-Compare your fitted `(alpha, beta)` to `true_alpha`/`true_beta`. How close did you get?
+Change `true_alpha` and `true_beta` above to a few different
+combinations of your own choosing, and re-run both chunks each time (the
+`set.seed(99)` line keeps the random noise reproducible, so you can
+compare fairly). Does `fit_sim$par` stay close to your new true values
+every time? Now specifically try a very small `true_alpha`, like `0.05`
+— what happens to the shape of the simulated data, and does recovery
+still work as well? (Set `true_alpha` and `true_beta` back to `0.5` and
+`2.5` before moving on.)
 
-```{r}
-# Your code here
+### Exercise 6 (interpretation)
 
-```
+With `true_alpha = 0.5, true_beta = 2.5` restored, compare this
+simulated participant's fitted `alpha` to the real Part 0–4
+participant's `fit_rmsd$par`. Which participant is more *sensitive*
+overall (reaches a given detection level at lower contrast)? Which
+participant's responses are more *reliable* around their own threshold
+(steeper `beta`)? These are two genuinely separate psychological
+questions — a participant can be sensitive but inconsistent, or
+insensitive but very reliable in their own way.
 
-### Exercise 10
+## Part 6: Does the shape of the model matter?
 
-Plot `data_sim`'s points, and overlay your fitted curve.
-
-```{r}
-# Your code here:
-# - plot(data_sim$contrast, data_sim$prop_correct, ...)
-# - x_seq <- seq(0, 1, length.out = 200)
-# - lines(x_seq, psychometric_model(fit_sim$par[1], fit_sim$par[2], x_seq), col = "blue")
-
-```
-
-### Exercise 11 (Interpretation)
-
-Compare this simulated participant's fitted `alpha` to the real Part 0–5 participant's `fit_rmsd$par`. Which participant is more *sensitive* overall (reaches a given detection level at lower contrast)? Which participant's responses are more *reliable* around their own threshold (steeper `beta`)? These are two genuinely separate psychological questions — a participant can be sensitive but inconsistent, or insensitive but very reliable in their own way.
-
-### Exercise 12 (extension)
-
-Try re-running the simulation with a few different `true_alpha`/`true_beta` combinations (edit the `set.seed()` / true value lines above and re-run Exercises 8–9). Does recovery still work well for every combination you try? Look specifically at what happens with a very small `true_alpha` (e.g. 0.05) — what does that do to the data, and why might that make the fit less reliable?
-
-## Part 7: Does the shape of the model matter?
-
-### Exercise 13
-
-Write `linear_model(a, b, x)`, returning `a + b * x`.
+Here's a plain linear model fit to the same data, alongside the Weibull
+fit from Part 4:
 
 ```{r}
-# Your code here
+linear_model <- function(a, b, x) {
+  a + b * x
+}
 
+rmsd_linear <- function(params, data) {
+  a <- params[1]; b <- params[2]
+  predicted <- linear_model(a, b, data$contrast)
+  sqrt(mean((data$prop_correct - predicted)^2))
+}
+
+fit_linear <- optim(par = c(a = 0.5, b = 0.5), fn = rmsd_linear, data = data)
+fit_linear$par
+fit_linear$value
+fit_rmsd$value
 ```
-
-### Exercise 14
-
-Write `rmsd_linear()`, analogous to `rmsd()` but using `linear_model()`.
 
 ```{r}
-# Your code here
+plot(data$contrast, data$prop_correct, pch = 19, ylim = c(-0.2, 1.2),
+     xlab = "Contrast", ylab = "Proportion correct")
 
+x_seq <- seq(0, 1, length.out = 200)
+lines(x_seq, psychometric_model(fit_rmsd$par[1], fit_rmsd$par[2], x_seq), col = "darkgreen")
+lines(x_seq, linear_model(fit_linear$par[1], fit_linear$par[2], x_seq), col = "blue")
+abline(h = c(0, 1), lty = "dotted")
+legend("topleft", legend = c("Weibull fit", "Linear fit"),
+       col = c("darkgreen", "blue"), lty = 1)
 ```
 
-### Exercise 15
+### Exercise 7
 
-Fit the linear model to the original `data` (not `data_sim`) with `optim()`. A reasonable starting point is `a = 0.5, b = 0.5`.
+Using `linear_model()` and `fit_linear$par` above, compute the linear
+model's predicted proportion correct at `contrast = 0` and at
+`contrast = 1`:
 
 ```{r}
-# Your code here
-
+linear_model(fit_linear$par[1], fit_linear$par[2], 0)
+linear_model(fit_linear$par[1], fit_linear$par[2], 1.5)
 ```
 
-### Exercise 16
+Now try `contrast = 1.5` and `contrast = -0.5` — values outside anything
+actually tested. What do you notice about these predicted values
+compared to what a real proportion can be?
 
-Compare `fit_linear$value` to `fit_rmsd$value`. Which model fits better by this measure?
+### Exercise 8 (discussion)
 
-```{r}
-# Your code here
+Is either of the Exercise 7 predictions at `contrast = 0` or
+`contrast = 1` outside the range a proportion can actually take? What
+does the Weibull model do instead at those same two points (try
+`psychometric_model(fit_rmsd$par[1], fit_rmsd$par[2], c(0, 1))`
+yourself), and why can it never do what the linear model just did?
 
-```
+## Part 7: The forgetting curve — fit it, then use it
 
-### Exercise 17
-
-Plot both fitted curves over the data, extending `ylim` a bit beyond $$0, 1$$ so any out-of-bounds predictions are visible (e.g. `ylim = c(-0.2, 1.2)`).
-
-```{r}
-# Your code here
-
-```
-
-### Exercise 18 (discussion)
-
-Check the linear model's prediction at `contrast = 0` and `contrast = 1`. Is either prediction outside the range a proportion can actually take? What does the Weibull model do instead at those same points, and why can it never do what the linear model just did?
-
-## Part 8: The forgetting curve — fit it, then use it
-
-Everything so far has been about detecting a stimulus. This last part applies the exact same fitting machinery to a completely different psychological phenomenon: how memory for a learned item decays over time — the classic **forgetting curve**.
+Everything so far has been about detecting a stimulus. This last part
+applies the exact same fitting machinery to a completely different
+psychological phenomenon: how memory for a learned item decays over time
+— the classic **forgetting curve**.
 
 ```{r}
 time_days <- c(0, 1, 2, 4, 7, 14, 21, 30)
 prop_recalled <- c(0.96, 0.88, 0.85, 0.76, 0.57, 0.35, 0.27, 0.14)
-
 forgetting_data <- data.frame(time_days, prop_recalled)
-forgetting_data
+
+plot(forgetting_data$time_days, forgetting_data$prop_recalled, pch = 19,
+     xlab = "Days since learning", ylab = "Proportion recalled", ylim = c(0, 1))
 ```
 
-### Exercise 19
-
-Plot `prop_recalled` against `time_days`. What shape is this — does it look like it could be described by the same S-shaped Weibull curve from Part 0–7, or does it look different?
+We'll model this with a classic two-parameter exponential forgetting
+curve, $p(t) = a \cdot e^{-b \cdot t}$, where `a` is the (estimated)
+proportion recalled at time zero and `b` is the decay rate:
 
 ```{r}
-# Your code here
+forgetting_model <- function(a, b, t) {
+  a * exp(-b * t)
+}
 
+rmsd_forgetting <- function(params, data) {
+  a <- params[1]; b <- params[2]
+  predicted <- forgetting_model(a, b, data$time_days)
+  sqrt(mean((data$prop_recalled - predicted)^2))
+}
+
+fit_forgetting <- optim(par = c(a = 0.9, b = 0.05), fn = rmsd_forgetting, data = forgetting_data)
+fit_forgetting$par
 ```
-
-### Exercise 20
-
-We'll model this with a classic two-parameter exponential forgetting curve:
-
-$$p(t) = a \cdot e^{-b \cdot t}$$
-
-Here `a` is the (estimated) proportion recalled at time zero, right after learning, and `b` is the decay rate — how quickly memory fades. Write this as `forgetting_model(a, b, t)`.
 
 ```{r}
-# Your code here
+plot(forgetting_data$time_days, forgetting_data$prop_recalled, pch = 19,
+     xlab = "Days since learning", ylab = "Proportion recalled", ylim = c(0, 1))
 
+t_seq <- seq(0, 30, length.out = 200)
+lines(t_seq, forgetting_model(fit_forgetting$par[1], fit_forgetting$par[2], t_seq), col = "blue")
 ```
 
-### Exercise 21
-
-Write `rmsd_forgetting()`, analogous to `rmsd()` from Part 2, and fit it with `optim()`. A reasonable starting point is `a = 0.9, b = 0.05`.
+Here's the actual inference question: **how many days pass before recall
+drops to 0.8 (80%)?** Setting $p(t) = 0.8$ and solving for $t$ gives
+$t = \ln(a/0.8)/b$:
 
 ```{r}
-# Your code here
-
+t_08 <- log(fit_forgetting$par[1] / 0.8) / fit_forgetting$par[2]
+t_08
 ```
 
-### Exercise 22
+### Exercise 9
 
-Here's the actual inference question: **how many days pass before recall drops to 0.8 (80% correct)?** Your fitted model gives you `a` and `b` — you're not given this answer directly, you have to derive it. Setting $p(t) = 0.8$ and solving for $t$:
+Change the `0.8` in the formula above to `0.5` instead — the time until
+recall drops to *half* its initial level, sometimes called a
+"half-life." Recompute `t_08` (or rename it if you like) with this new
+target. Does the resulting number of days make sense relative to the
+data plot above?
 
-$$0.8 = a \cdot e^{-bt} \quad\Longrightarrow\quad t = \frac{\ln(a / 0.8)}{b}$$
+### Exercise 10 (discussion)
 
-Compute this using your fitted `a` and `b`.
-
-```{r}
-# Your code here:
-# - t_08 <- log(fit_forgetting$par[1] / 0.8) / fit_forgetting$par[2]
-
-```
-
-### Exercise 23 (discussion)
-Sanity-check your answer to Exercise 22 against the raw data plot from Exercise 19 — does the time you calculated fall in a sensible place relative to where the observed points cross 0.8? What would it mean, mathematically, if your fitted `a` had come out *below* 0.8? (Think about what the formula in Exercise 22 would do in that case, and whether that outcome would make sense for a real forgetting curve.)
+With the original target of 0.8: sanity-check your Exercise-9-style
+answer against the raw data plot — does the time you calculated fall in
+a sensible place relative to where the observed points cross that
+target? What would it mean, mathematically, if your fitted `a` had come
+out *below* the target proportion you were solving for? (Think about
+what the formula would do in that case, and whether the result would
+make sense for a real forgetting curve.)
