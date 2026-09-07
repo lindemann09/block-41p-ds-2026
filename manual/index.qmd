@@ -24,9 +24,9 @@ This online course manual that contains all instructions and the important study
 #| echo: false
 
 # linked materials
-visible_practicals = 2
-visible_solutions = 0
-visible_lectures = 1
+visible_practicals = 3
+visible_solutions = 1
+visible_lectures = 2
 
 practical_title = c(
   "Introduction 1: R basics",
