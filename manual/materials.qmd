@@ -29,3 +29,5 @@ Please note that some of the references are only accessible from the university 
   - [But what is a neural network? \| Deep learning chapter 1](https://www.youtube.com/watch?v=aircAruvnKk)
   - [Gradient descent, how neural networks learn \| Deep learning chapter 2](https://www.youtube.com/watch?v=IHZwWFHWa-w)
   - [What is backpropagation really doing? \| Deep learning chapter 3](https://www.youtube.com/watch?v=Ilg3gGewQ5U)
+  
+*The list is not complete and will be updated during the course.*
