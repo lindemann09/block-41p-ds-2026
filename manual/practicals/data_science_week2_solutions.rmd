@@ -1,0 +1,274 @@
+---
+title: "Practical 2: R Exercises II -- Solutions"
+output:
+  html_document:
+    toc: true
+format:
+  html:
+    toc: true
+    toc-expand: 2
+---
+
+> Try the exercises yourself first -- the value is in getting stuck, not in reading the answer.
+
+
+## Part 1: Writing your own functions
+
+### Exercise 1
+
+```{r}
+celsius_to_fahrenheit <- function(c) {
+  f <- c * 9/5 + 32
+  return(f)
+}
+
+celsius_to_fahrenheit(0)
+celsius_to_fahrenheit(37)
+celsius_to_fahrenheit(100)
+```
+
+### Exercise 2
+
+```{r}
+mean_center <- function(x) {
+  x - mean(x)
+}
+
+mean_center(c(452, 618, 390, 705, 511))
+```
+
+### Exercise 3
+
+```{r}
+standardize <- function(x, target_mean = 0, target_sd = 1) {
+  centered <- mean_center(x)
+  z <- centered / sd(x)
+  z * target_sd + target_mean
+}
+
+standardize(c(452, 618, 390, 705, 511))          # default: mean 0, SD 1
+standardize(c(452, 618, 390, 705, 511), 100, 15)  # rescaled to mean 100, SD 15
+```
+
+------------------------
+
+## Part 2: If-statements
+
+### Exercise 4
+
+```{r}
+classify_score <- function(score) {
+  if (score >= 55) {
+    "pass"
+  } else {
+    "fail"
+  }
+}
+
+classify_score(40)
+classify_score(55)
+classify_score(80)
+```
+
+### Exercise 5
+
+```{r}
+classify_grade <- function(score) {
+  if (score >= 85) {
+    "A"
+  } else if (score >= 70) {
+    "B"
+  } else if (score >= 55) {
+    "C"
+  } else {
+    "F"
+  }
+}
+
+classify_grade(90)
+classify_grade(72)
+classify_grade(60)
+classify_grade(30)
+```
+
+### Exercise 6 (discussion)
+
+```{r}
+# classify_score(c(40, 55, 80))   # try running this -- it errors (or in older R, warns
+                                    # and silently uses only the first element)
+```
+
+`if` expects a single `TRUE`/`FALSE` value, not a whole vector of them
+-- when you hand it a vector of three comparisons, it doesn't know which
+one to branch on, so it errors (in current R versions) rather than
+guessing. `ifelse()` is specifically built to handle a whole vector at
+once: it checks each element's condition individually and returns a
+vector of results, one per input. The rule of thumb: use `if`/`else` for
+a single decision inside your code's logic (like deciding what a
+function should do); use `ifelse()` when you want to apply the same
+decision to every element of a vector at once, as a vectorized
+operation.
+
+--------------------
+
+## Part 3: For-loops
+
+### Exercise 7
+
+```{r}
+for (i in 1:10) {
+  print(i^2)
+}
+```
+
+### Exercise 8
+
+```{r}
+scores <- c(45, 78, 62, 90, 38, 71)
+
+running_total <- 0
+for (i in 1:length(scores)) {
+  running_total <- running_total + scores[i]
+}
+running_total
+```
+
+You should get `384`, matching `sum(scores)`.
+
+### Exercise 9
+
+```{r}
+count_above_60 <- 0
+for (i in 1:length(scores)) {
+  if (scores[i] > 60) {
+    count_above_60 <- count_above_60 + 1
+  }
+}
+count_above_60
+```
+
+You should get `4`.
+
+---------------------------------
+
+## Part 4: Matrices
+
+### Exercise 10
+
+R fills column by column, so `matrix(c(1, 3, 2, 4), nrow = 2)` places
+the numbers `1, 3` down the first column and `2, 4` down the second:
+
+```{r}
+M <- matrix(c(1, 3, 2, 4), nrow = 2)
+M
+```
+
+Row 1, column 2 is `2`.
+
+### Exercise 11
+
+```{r}
+M2 <- matrix(1:9, nrow = 3)
+M2
+
+M2[2, 3]      # (a) row 2, column 3
+M2[2, ]       # (b) entire second row
+M2[, 3]       # (c) entire third column
+```
+
+### Exercise 12
+
+```{r}
+W <- matrix(c(1, 3, 2, 4), nrow = 2)
+x <- c(5, 6)
+
+W * x     # element-wise: [1*5, 3*6, 2*5, 4*6] reshaped -> completely different numbers
+W %*% x   # matrix multiplication: row 1 . x = 17, row 2 . x = 39
+```
+
+`W %*% x` gives `17` and `39`, matching the worked hand-calculation in
+the practical exactly: row 1 of `W` (`1, 2`) combined with `x` (`5, 6`)
+is `1*5 + 2*6 = 17`; row 2 (`3, 4`) combined with `x` is
+`3*5 + 4*6 = 39`. `W * x` gives something else entirely, because it's
+not pairing rows with columns at all -- it's just multiplying whatever
+happens to sit in the same position once `x` is recycled down `W`'s
+column-major storage order. Worth actually printing both outputs side by
+side and confirming they don't match -- this is the single most common
+source of silently-wrong results once matrices show up for real in the
+neural network sessions.
+
+
+--------------------------------------
+
+## Part 5: For-loops and vector arithmetic
+
+### Exercise 13
+
+```{r}
+observed  <- c(0.40, 0.60, 0.55, 0.60, 0.62, 0.90, 0.92, 0.95, 1.00)
+predicted <- c(0.50, 0.60, 0.70, 0.75, 0.80, 0.85, 0.88, 0.90, 0.93)
+
+total_squared_error <- 0
+for (i in 1:length(observed)) {
+  squared_error <- (observed[i] - predicted[i])^2
+  total_squared_error <- total_squared_error + squared_error
+}
+rmsd_loop <- sqrt(total_squared_error / length(observed))
+
+rmsd_vectorized <- sqrt(mean((observed - predicted)^2))
+
+rmsd_loop == rmsd_vectorized
+```
+
+You should get `TRUE` -- both approaches compute exactly the same
+number.
+
+### Exercise 14 (discussion)
+
+`(observed - predicted)` subtracts the two vectors element by element,
+giving a vector of 9 differences (one per data point) -- exactly what
+the loop's `observed[i] - predicted[i]` computes, one `i` at a time,
+except all 9 at once. `^2` then squares every one of those 9 differences
+simultaneously, matching the loop's `squared_error <- (...)^2` line
+applied to all elements together rather than one per iteration. `mean()`
+then does two things the loop needed two separate pieces of code for: it
+adds all 9 squared differences together (replacing the loop's
+`total_squared_error <- total_squared_error + squared_error` running
+total), *and* divides by how many there are (replacing the loop's final
+`/ length(observed)`) -- both folded into one function call.
+
+### Exercise 15
+
+```{r}
+mean_center_loop <- function(x) {
+  m <- mean(x)
+  result <- numeric(length(x))
+  for (i in 1:length(x)) {
+    result[i] <- x[i] - m
+  }
+  result
+}
+
+mean_center_loop(c(452, 618, 390, 705, 511))
+mean_center(c(452, 618, 390, 705, 511))
+```
+
+Both should give identical output.
+
+### Exercise 16 (discussion)
+
+The vectorized version is easier to read at a glance --
+`sqrt(mean((observed - predicted)^2))` states the RMSD formula almost
+exactly as you'd write it in mathematical notation, in one line, while
+the loop version takes 5 lines to express the same idea and requires
+holding "what's `total_squared_error` currently equal to" in your head
+as you read through it. The loop version also has more places for a
+small bug to hide: starting the running total at the wrong value, an
+off-by-one error in `1:length(observed)`, forgetting to reset the total
+before a second run -- none of these are possible in the vectorized
+version, because there's no running state to manage at all. Speed
+matters too, especially once datasets get large, but the readability and
+bug-avoidance reasons alone are why essentially every function you'll
+write for the rest of this course -- `rmsd()`, `nll()`,
+`psychometric_model()` -- is written the vectorized way, with no
+explicit loop over data points anywhere in sight.

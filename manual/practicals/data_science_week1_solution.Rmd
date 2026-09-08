@@ -1,1 +1,212 @@
-coming soon
+---
+title: "Practical 1: R Exercises I -- Solutions"
+output:
+  html_document:
+    toc: true
+format:
+  html:
+    toc: true
+    toc-expand: 2
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+> Try the exercises yourself first -- the value is in getting stuck, not
+> in reading the answer.
+
+------------------------------------------------------------------------
+
+## Part 1: Variables and basic operations
+
+### Exercise 1
+
+```{r}
+rt1 <- 452
+rt2 <- 618
+rt3 <- 390
+average_rt <- (rt1 + rt2 + rt3) / 3
+average_rt
+```
+
+### Exercise 2
+
+```{r}
+score <- 0
+score <- score + 4
+score
+score <- score - 1
+score
+score <- score + 2
+score
+```
+
+### Exercise 3
+
+```{r}
+r <- 7.5
+area <- pi * r^2
+area
+```
+
+------------------------------------------------------------------------
+
+## Part 2: Data types
+
+### Exercise 4
+
+```{r}
+age_text <- "25"
+# age_text * 2  -- this line would error: non-numeric argument to binary operator.
+# "25" is a character string, not a number -- R won't silently guess you meant the number 25.
+
+age_number <- as.numeric(age_text)
+age_number * 2
+```
+
+### Exercise 5
+
+```{r}
+5 > 3        # TRUE
+5 == "5"     # TRUE -- R converts 5 to the character "5" to compare them, since one side is already text
+!(5 > 3)     # FALSE
+"cat" == "dog"  # FALSE
+```
+
+The `5 == "5"` result is the one worth pausing on: it's `TRUE`, not an
+error and not `FALSE`. R quietly converts the number to text before
+comparing, rather than complaining about the type mismatch -- exactly
+the kind of "quiet conversion" the manual warns about.
+
+### Exercise 6
+
+```{r}
+responded_correctly <- TRUE
+ifelse(responded_correctly, "correct", "incorrect")
+```
+
+------------------------------------------------------------------------
+
+## Part 3: Numerical gotchas
+
+### Exercise 7
+
+```{r}
+1 / 0      # Inf
+-1 / 0     # -Inf
+0 / 0      # NaN
+log(0)     # -Inf
+log(-1)    # NaN, with a warning
+```
+
+### Exercise 8
+
+```{r}
+test_values <- list(NA, NaN, Inf, 5)
+for (v in test_values) {
+  cat(sprintf("value: %-6s  is.na: %-6s  is.nan: %-6s  is.finite: %-6s\n",
+              as.character(v), is.na(v), is.nan(v), is.finite(v)))
+}
+```
+
+You should find `is.na(NaN)` comes out `TRUE` -- genuinely surprising
+the first time you see it. Looking up `?is.na` explains why: R's help
+page states explicitly that `is.na()` is also `TRUE` for `NaN`, because
+`NaN` is implemented internally as a special case of the missing-value
+family, not as something wholly separate. `is.nan()` is the stricter
+check if you specifically want to know "is this exactly NaN, not just
+any kind of missing/undefined value."
+
+### Exercise 9
+
+```{r}
+values <- c(3, 5, NaN, 2, 8)
+sum(values)
+mean(values)
+```
+
+Both come out `NaN`, even though only one of the five values is actually
+the problem. `sum()` and `mean()` don't skip over the bad value and work
+around it by default -- one `NaN` anywhere in the input makes the whole
+result `NaN`. (If you're curious: both functions do have an
+`na.rm = TRUE` argument that would skip missing/NaN values instead --
+worth knowing exists, even though the point of this exercise is to see
+the default "poisoning" behavior first.)
+
+------------------------------------------------------------------------
+
+## Part 4: Calling functions
+
+### Exercise 10
+
+```{r}
+round(3.14159, 2)
+```
+
+### Exercise 11
+
+```{r}
+rnorm(8, mean = 100, sd = 15)
+```
+
+(Your actual numbers will differ each time you run this -- `rnorm()`
+draws new random values every call, unless you fix them with
+`set.seed()` first, which you'll meet properly in a later practical.)
+
+### Exercise 12
+
+```{r}
+sqrt(log(50))
+```
+
+------------------------------------------------------------------------
+
+## Part 5: Vectors
+
+### Exercise 13
+
+```{r}
+reaction_times <- c(452, 618, 390, 705, 511)
+```
+
+### Exercise 14
+
+```{r}
+mean(reaction_times)
+max(reaction_times)
+reaction_times - mean(reaction_times)
+```
+
+### Exercise 15
+
+```{r}
+reaction_times[c(2, 4)]                          # (a)
+reaction_times[reaction_times > 500]              # (b)
+reaction_times[-which.max(reaction_times)]        # (c)
+```
+
+### Exercise 16
+
+```{r}
+ages <- c(Alex = 28, Priya = 34, Sam = 25)
+ages["Priya"]
+```
+
+### Exercise 17
+
+```{r}
+seq(0, 1, length.out = 10)
+```
+
+### Exercise 18 (discussion)
+
+R applies `-` between a vector and a single number by **recycling** the
+single number against every element of the vector -- effectively
+treating `mean(reaction_times)` as if it were repeated once for every
+element, then subtracting position by position. That's the same
+"operations apply to every element at once" rule from the manual's
+coverage of vectors, just for subtraction specifically rather than
+addition or multiplication. Behind the scenes this is doing exactly the
+same work a for-loop would do, one element at a time -- next session's
+final section makes that equivalence completely explicit, with a real
+for-loop and its vectorized equivalent side by side.
