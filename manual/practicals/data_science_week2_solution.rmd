@@ -9,7 +9,7 @@ format:
     toc-expand: 2
 ---
 
-> Try the exercises yourself first -- the value is in getting stuck, not in reading the answer.
+> Try the exercises yourself first. The value is in getting stuck, not in reading the answer.
 
 
 ## Part 1: Writing your own functions
