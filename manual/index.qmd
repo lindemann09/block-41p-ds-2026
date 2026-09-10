@@ -27,6 +27,7 @@ This online course manual that contains all instructions and the important study
 visible_practicals = 3
 visible_solutions = 2
 visible_lectures = 2
+visible_assignments = 1
 
 practical_title = c(
   "Introduction 1: R basics",
@@ -106,7 +107,7 @@ lecture <- function(week) {
 All tutorials find place in the **Langeveld** build. Please look at your timetable for the lecture halls. The exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
 
 
-# Rmd files
+# Practical (Rmd files)
 
 You can download the R-Markdown (.Rmd) files with the exercises for the practical sessions. You can open these files in RStudio and make changes.
 
@@ -115,7 +116,7 @@ You can download the R-Markdown (.Rmd) files with the exercises for the practica
 #| echo: false
 for (i in 1:visible_practicals)
 {
-  cat(paste0("[Rmd Week ", i, "](rmd/data_science_week", i, ".Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
+  cat(paste0("[Practical Rmd Week ", i, "](rmd/data_science_week", i, ".Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
 }
 cat("</br>")
 ```
@@ -131,6 +132,37 @@ if (visible_solutions == 0) {
   for (i in 1:visible_solutions)
   {
     cat(paste0("[Solution Week ", i, "](practicals/data_science_week", i, "_solution.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
+  }
+}
+cat("</br>")
+```
+
+
+# Assignments (Rmd files)
+
+You can download the R-Markdown (.Rmd) files with the exercises for the assignments. You can open these files in RStudio and make changes.
+
+```{r}
+#| output: asis
+#| echo: false
+for (i in 1:visible_assignments)
+{
+  cat(paste0("[Assignment Rmd Week ", i+2, "](rmd/data_science_week", i, "_assignment.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
+}
+cat("</br>")
+```
+
+**Solutions**
+
+```{r}
+#| output: asis
+#| echo: false
+if (visible_assignment_solutions == 0) {
+  cat("*-- coming soon --*")
+} else {
+  for (i in 1:visible_solutions)
+  {
+    cat(paste0("[Solution Week ", i+2, "](practicals/data_science_week", i, "_assignment_solution.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
   }
 }
 cat("</br>")
