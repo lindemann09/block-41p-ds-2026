@@ -28,6 +28,7 @@ visible_practicals = 3
 visible_solutions = 2
 visible_lectures = 2
 visible_assignments = 1
+visible_assignment_solutions = 0
 
 practical_title = c(
   "Introduction 1: R basics",
@@ -147,7 +148,7 @@ You can download the R-Markdown (.Rmd) files with the exercises for the assignme
 #| echo: false
 for (i in 1:visible_assignments)
 {
-  cat(paste0("[Assignment Rmd Week ", i+2, "](rmd/data_science_week", i, "_assignment.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
+  cat(paste0("[Assignment Rmd Week ", i+2, "](assignments/data_science_week", i, "_assignment.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
 }
 cat("</br>")
 ```

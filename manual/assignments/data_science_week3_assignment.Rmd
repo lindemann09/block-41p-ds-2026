@@ -18,14 +18,17 @@ system has to make an assumption somewhere, and it turns out that
 assumption is a personal, measurable bias: your own **preferred lighting
 direction**.
 
-![](images/clipboard-48802356.png){width="296"}
+```{r echo=FALSE, out.width='50%'}
+knitr::include_graphics('https://github.com/lindemann09/block-41p-ds-2026/blob/main/manual/assignments/images/clipboard-48802356.png?raw=true')
+```
+
 
 *Image from Adams, Graf, and Ernst (2004)*
 
 In an experiment, a single participant views a shaded disk at many
 different orientations and judges, on each trial, whether it looked like
 a bump or a dent.
-
+  
 **Orientation convention:** `theta = 0` means the disk's shading is
 consistent with light coming from directly above. Negative values of
 `theta` mean the implied light source is rotated toward the
