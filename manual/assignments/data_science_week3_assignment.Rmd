@@ -11,9 +11,11 @@ When we see a shaded disk, whether it looks like a **bump** (convex) or a **dent
 
 In an experiment, a single participant views a shaded disk at many different orientations and judges, on each trial, whether it looks like a bump or a dent.
 
-![](images/clipboard-48802356.png)
+```{r echo=FALSE, out.width='50%'}
+knitr::include_graphics('https://github.com/lindemann09/block-41p-ds-2026/blob/main/manual/assignments/images/clipboard-48802356.png?raw=true')
+```
 
-**Figure** from Adams, Graf, and Ernst (2004)
+**Figure from Adams, Graf, and Ernst (2004)**
 
 **Orientation convention:** `theta = 0` means the disk's shading is consistent with light coming from directly above. Negative values of `theta` mean the implied light source is rotated toward the participant's **left**; positive values mean it's rotated toward the participant's **right**.
 
@@ -50,6 +52,30 @@ where $\Phi(x; \mu, \sigma)$ is the normal cumulative distribution function (`pn
 - $\alpha$ — the orientation where the curve peaks. This is the number we actually care about: the participant's estimated preferred lighting direction.
 - $\tau$ — the width of the peak (how wide a range of orientations look bump-like).
 - $\sigma$ — how sharply the curve rises and falls at its edges.
+
+### Where does this shape come from?
+
+This is often called a **double sigmoid** — it's built from two ordinary S-shaped sigmoid curves (normal CDFs), *subtracted* from each other. It's worth seeing why that subtraction produces a peak, rather than just taking the formula on faith:
+
+```{r}
+theta_seq <- seq(-120, 120, length.out = 200)
+alpha <- 10; tau <- 150; sigma <- 40
+
+left_curve  <- pnorm(theta_seq, alpha - tau/2, sigma)   # rises EARLY, as theta increases
+right_curve <- pnorm(theta_seq, alpha + tau/2, sigma)   # rises LATE, as theta increases
+difference  <- left_curve - right_curve
+
+plot(theta_seq, left_curve, type = "l", col = "gray50", lty = 2,
+     xlab = "theta", ylab = "value", ylim = c(0, 1))
+lines(theta_seq, right_curve, col = "gray50", lty = 3)
+lines(theta_seq, difference, col = "darkgreen", lwd = 2)
+legend("topleft", legend = c("left curve (rises early)", "right curve (rises late)", "difference (the bump)"),
+       col = c("gray50", "gray50", "darkgreen"), lty = c(2, 3, 1), lwd = c(1, 1, 2))
+```
+
+The "left" curve climbs from 0 to 1 as `theta` increases past `alpha - tau/2`. The "right" curve does exactly the same climb, just shifted further along — it doesn't start rising until `theta` passes `alpha + tau/2`. In between those two points, the left curve has already reached (or nearly reached) 1, while the right curve is still sitting near 0 — so their *difference* is large: close to 1. Outside that middle band, either both curves are near 0 (far left) or both are near 1 (far right), so the difference collapses back toward 0 in either direction. Two rising S-curves, offset from each other, and subtracted — that's the entire mechanism behind the peak.
+
+**Why this particular shape is a sensible model for this data:** the psychological story is exactly "rises, peaks, falls" too. Near the participant's true preferred lighting direction, "bump" responses should be common; moving away from it in *either* direction, the shading becomes progressively more ambiguous, so "bump" responses should become progressively less common — approaching chance, not zero, since even at the most ambiguous orientations a participant is still guessing, not reliably saying "dent." A double sigmoid gives you exactly that shape — a peak with two symmetric, gradually-falling shoulders — for free, just by choosing where the two component curves sit relative to each other.
 
 Here's that formula written directly as an R function:
 
