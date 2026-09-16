@@ -1,5 +1,5 @@
 ---
-title: "Practical 3: Supervised Learning"
+title: "Practical 4: Supervised Learning"
 subtitle: "Basic Methods for Fitting a Model to Data"
 output:
   html_document:
@@ -8,8 +8,8 @@ format:
   html:
     toc: true
     toc-expand: 2
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 

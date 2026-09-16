@@ -1,6 +1,6 @@
 ---
 title: "Week 3: Resampling & Monte Carlo Methods"
-subtitle: "How Randomness can help us Understand Data"
+subtitle: "How Randomness can help us Understand the World"
 ---
 
 ## Motivation
