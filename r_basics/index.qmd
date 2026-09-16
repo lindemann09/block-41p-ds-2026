@@ -24,6 +24,10 @@ This manual guides you though the _R_ course and explains all concepts you need 
 
 A __PDF__ version of this tutorial can be downloaded, if you click on the little PDF symbol behind the title on the top-left.
 
+**R Instruction Videos**
+
+There are several R instruction videos available via on Canvas. Some are related to the topics covered in this tutorial. You might find them helpful.
+
 \vfill
 
 ---

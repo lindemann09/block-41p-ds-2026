@@ -7,7 +7,6 @@ author:
 ---
 
 
-
 ::: {.columns}
 ::: {.column style='width: 60%; text-align: left;' }
 This online course manual that contains all instructions and the important study materials for the course "Data Science". Further information about this course are found on [Canvas](https://canvas.eur.nl/courses//55946).
@@ -30,25 +29,44 @@ visible_lectures = 2
 visible_assignments = 1
 visible_assignment_solutions = 0
 
+# practical_title = c(
+#   "Introduction 1: R basics",
+#   "Introduction 2: R basics",
+#   "Parameter Estimation",
+#   "Neural Networks 1",
+#   "Neural Networks 2",
+#   "Cognitive Modelling",
+#   "Multinomial Processing Tree Models",
+#   "Reaction Time Models")
+
+# lecture_title= c(
+#   "Introduction to Data Science",
+#   "Parameter Estimation",
+#   "Neural Networks 1",
+#   "Neural Networks 2",
+#   "Cognitive Modelling",
+#   "Multinomial Processing Tree Models",
+#   "Reaction Time Models",
+#   "Q & A Lecture")
+
 practical_title = c(
   "Introduction 1: R basics",
   "Introduction 2: R basics",
   "Parameter Estimation",
+  "Resampling & Monte Carlo Methods",
   "Neural Networks 1",
   "Neural Networks 2",
-  "Cognitive Modelling",
-  "Multinomial Processing Tree Models",
-  "Reaction Time Models")
+  "Cognitive Modelling")
 
 lecture_title= c(
   "Introduction to Data Science",
   "Parameter Estimation",
+  "Resampling & Monte Carlo Methods",
   "Neural Networks 1",
   "Neural Networks 2",
   "Cognitive Modelling",
-  "Multinomial Processing Tree Models",
-  "Reaction Time Models",
   "Q & A Lecture")
+
 
 # practical rooms
 practical_room = c(
@@ -93,16 +111,16 @@ lecture <- function(week) {
 *Note: In the first week, the lecture is at 11:00 and a practical at 13:00.*
 
 
-| Date        | Topic | Room        | Practical   (11:00) | Lecture (13:00)         |
+| Date        | Week | Room        | Practical   (11:00) | Lecture (13:00)         |
 | ----------- | :---: | ----------- | ------------------- | ----------------------- |
 | `r week(1)` |   1   | `r room(1)` | `r practical(1)`    | `r lecture(1)`  (OL,YM) |
 | `r week(2)` |   2   | `r room(2)` | `r practical(2)`    | `r lecture(2)`  (YM)    |
-| `r week(3)` |   3   | `r room(3)` | `r practical(3)`    | `r lecture(3)`  (YM)    |
-| `r week(4)` |   4   | `r room(4)` | `r practical(4)`    | `r lecture(4)`  (YM)    |
-| `r week(5)` |   5   | `r room(5)` | `r practical(5)`    | `r lecture(5)`  (OL)    |
-| `r week(6)` |   6   | `r room(6)` | `r practical(6)`    | `r lecture(6)`  (OL)    |
-| `r week(7)` |   7   | `r room(7)` | `r practical(7)`    | `r lecture(7)`  (OL)    |
-| `r week(8)` |   8   | `r room(8)` | `r practical(8)`    | `r lecture(8)`  (YM,OL) |
+| `r week(3)` |       |             | *NO MEETING*        | *NO MEETING*            |
+| `r week(4)` |   3   | `r room(4)` | `r practical(3)`    | `r lecture(3)`  (OL)    |
+| `r week(5)` |   4   | `r room(5)` | `r practical(4)`    | `r lecture(4)`  (YM)    |
+| `r week(6)` |   5   | `r room(6)` | `r practical(5)`    | `r lecture(5)`  (YM)    |
+| `r week(7)` |   6   | `r room(7)` | `r practical(6)`    | `r lecture(6)`  (OL)    |
+| `r week(8)` |   7   | `r room(8)` | `r practical(7)`    | `r lecture(7)`  (YM,OL) |
 
 
 All tutorials find place in the **Langeveld** build. Please look at your timetable for the lecture halls. The exam will take place in the week after the last lecture, please check your timetable for the exact date and location.
@@ -148,7 +166,7 @@ You can download the R-Markdown (.Rmd) files with the exercises for the assignme
 #| echo: false
 for (i in 1:visible_assignments)
 {
-  cat(paste0("[Assignment Rmd Week ", i+2, "](assignments/data_science_week", i, "_assignment.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
+  cat(paste0("[Assignment Rmd ", i, "](assignments/data_science_assignment_", i, ".Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
 }
 cat("</br>")
 ```
