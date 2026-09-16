@@ -1,7 +1,0 @@
----
-title: "Week X: Title"
-subtitle: "Subtitle"
----
-
-## Motivation
-....
