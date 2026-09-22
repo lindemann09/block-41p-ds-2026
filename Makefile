@@ -13,6 +13,7 @@ manual:
 	cp -r r_basics/_book _build/r_basics
 	# make rmd_downloads
 	cp -r manual/practicals/ _build/rmd/
+	cp -r manual/assignments/ _build/rmd/
 
 install_requirements:
 	Rscript -e 'options(repos = c(CRAN = "https://cran.uni-muenster.de"))' \

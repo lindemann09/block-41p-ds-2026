@@ -24,8 +24,8 @@ This online course manual that contains all instructions and the important study
 
 # linked materials
 visible_practicals = 3
-visible_solutions = 2
-visible_lectures = 2
+visible_solutions = 3
+visible_lectures = 3
 visible_assignments = 1
 visible_assignment_solutions = 0
 
@@ -157,28 +157,29 @@ cat("</br>")
 ```
 
 
-# Assignments (Rmd files)
+# Assignments
 
-You can download the R-Markdown (.Rmd) files with the exercises for the assignments. You can open these files in RStudio and make changes.
+Find below the assignments. The assignment have to be submitted via Canvas at the end of this block.
 
 ```{r}
 #| output: asis
 #| echo: false
 for (i in 1:visible_assignments)
 {
-  cat(paste0("[Assignment Rmd ", i, "](assignments/data_science_assignment_", i, ".Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
+  fl = paste0("data_science_assignment_", i, ".Rmd")
+  cat(paste0("[Assignment ", i, "](assignments/", fl, ") ([download](rmd/", fl, ")) </br>"))
 }
 cat("</br>")
 ```
 
-**Solutions**
 
 ```{r}
 #| output: asis
 #| echo: false
 if (visible_assignment_solutions == 0) {
-  cat("*-- coming soon --*")
+  cat("</br>")
 } else {
+  cat("**Solutions**\n\n")
   for (i in 1:visible_solutions)
   {
     cat(paste0("[Solution Week ", i+2, "](practicals/data_science_week", i, "_assignment_solution.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
