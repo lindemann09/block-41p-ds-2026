@@ -1,0 +1,246 @@
+---
+title: "Week 3: Supervised Learning -- Solutions"
+output:
+  html_document:
+    toc: true
+format:
+  html:
+    toc: true
+    toc-expand: 2
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+> Posted a few days after the session. Try the exercises yourself first
+> -- the value is in getting stuck, not in reading the answer.
+
+## Setup (from the handout)
+
+```{r}
+contrast <- seq(0, 1, 0.12)
+n_trials <- rep(40, 9)
+n_correct <- c(16, 25, 23, 24, 25, 36, 37, 38, 40)
+prop_correct <- n_correct / n_trials
+data <- data.frame(contrast, n_correct, n_trials, prop_correct)
+
+psychometric_model <- function(alpha, beta, x) {
+  y <- rep(0, length(x))
+  valid <- x >= 0
+  y[valid] <- 0.5 + 0.5*(1 - exp(-(x[valid] / alpha)^beta))
+  y
+}
+
+rmsd <- function(params, data) {
+  alpha <- params[1]; beta <- params[2]
+  predicted <- psychometric_model(alpha, beta, data$contrast)
+  sqrt(mean((data$prop_correct - predicted)^2))
+}
+
+fit_rmsd <- optim(par = c(alpha = 0.3, beta = 1), fn = rmsd, data = data)
+```
+
+## Exercise 1
+
+There's no single correct numeric answer -- it's an eyeballing exercise.
+A reasonable guess: `alpha` somewhere around 0.5-0.6 (wherever the curve
+looks like it's crossing about 75%), `beta` somewhere around 2-4 (a
+moderately steep, not extremely sharp or shallow, rise).
+
+## Exercise 2
+
+```{r}
+rmsd(c(alpha = 0.5, beta = 3), data)    # a plausible guess -- RMSD around 0.08
+rmsd(c(alpha = 0.1, beta = 1), data)    # a deliberately bad guess -- RMSD around 0.24
+```
+
+The bad guess gives a noticeably higher RMSD, as expected -- roughly
+three times worse. Your own Exercise 1 guess should land somewhere
+closer to the first number than the second, if your eyeballing was
+reasonable.
+
+## Exercise 3
+
+```{r}
+alpha_vals <- seq(0.7, 1, length.out = 50)   # deliberately excludes the true region
+beta_vals <- seq(0.1, 6, length.out = 100)
+grid <- expand.grid(alpha = alpha_vals, beta = beta_vals)
+grid$rmsd <- apply(grid, 1, function(row) rmsd(row, data))
+best <- grid[which.min(grid$rmsd), ]
+best
+```
+
+You should find `best` now reports `alpha` right at the *edge* of the
+searched range (around 0.7), with an RMSD around 0.085 -- clearly worse
+than the roughly 0.066 you'd get searching the full range. This is
+exactly the limitation the exercise is pointing at: grid search has no
+way to tell you "there's a better answer outside the box I searched" --
+it just confidently reports the best point it happened to check, and a
+narrowed or misplaced range gives you a wrong (if plausible-looking)
+answer with no warning attached. Remember to set `alpha_vals` back to
+`seq(0.01, 1, length.out = 100)` before continuing.
+
+## Exercise 4
+
+```{r}
+fit_far <- optim(par = c(alpha = 0.9, beta = 0.2), fn = rmsd, data = data)
+fit_far$par
+```
+
+You should get essentially the same answer as `fit_rmsd$par` (around
+`alpha ≈ 0.585, beta ≈ 3.25`), despite starting quite far from it in
+both parameters. Try a couple more starting points of your own -- for
+this particular dataset, you should find `optim()` reliably lands in the
+same place almost regardless of where it starts, because there's only
+one clear valley in the RMSD surface (as you'll see explicitly if you
+ever plot the full cost surface).
+
+## Exercise 5
+
+There's no single expected answer here since it depends on which values
+you tried, but the general pattern: recovery works well for most
+reasonable combinations. It breaks down specifically with a very small
+`true_alpha`, such as 0.05:
+
+```{r}
+set.seed(99)
+contrast_sim <- seq(0, 1, 0.12)
+true_alpha <- 0.05
+true_beta  <- 2.5
+p_true <- psychometric_model(true_alpha, true_beta, contrast_sim)
+n_trials_sim <- rep(40, 9)
+n_correct_sim <- rbinom(length(contrast_sim), n_trials_sim, p_true)
+prop_correct_sim <- n_correct_sim / n_trials_sim
+
+data_sim <- data.frame(contrast = contrast_sim, n_correct = n_correct_sim,
+                        n_trials = n_trials_sim, prop_correct = prop_correct_sim)
+data_sim
+
+fit_sim <- optim(par = c(alpha = 0.3, beta = 1), fn = rmsd, data = data_sim)
+fit_sim$par
+```
+
+With `true_alpha = 0.05`, every contrast level except `contrast = 0` is
+already at (or essentially at) ceiling performance in the simulated data
+-- there's really only *one* informative data point left (the one at
+`contrast = 0`), since all the others just say "yes, definitely correct"
+regardless of the true curve's exact shape past that. With that little
+information, `optim()` typically finds a fit that's an *excellent* match
+to this particular simulated dataset -- often an even lower RMSD than
+the true parameters would give -- while landing on `alpha`/`beta` values
+nowhere near the true `(0.05, 2.5)`. That's a genuinely important
+result: a great RMSD doesn't guarantee you've recovered the true
+parameters, especially when the data itself doesn't contain enough
+information to distinguish between many different curves. Remember to
+set `true_alpha`/`true_beta` back to `0.5`/`2.5` before continuing.
+
+## Exercise 6 (interpretation)
+
+Comparing `alpha ≈ 0.49` (the `true_alpha = 0.5` simulated participant)
+to `alpha ≈ 0.59` (the real Part 0-4 participant, `fit_rmsd$par`): the
+simulated participant has a **lower threshold** -- they reach a given
+detection level at lower contrast, so they're more sensitive overall.
+The simulated participant's `beta` (around 2.5) is a bit lower than the
+real participant's (around 3.25), meaning their rise is slightly more
+gradual -- somewhat less consistent responding right around their own
+threshold. These are two separate psychological dimensions (overall
+sensitivity vs. reliability of responding), and a participant can score
+differently on each.
+
+## Exercise 7
+
+```{r}
+linear_model <- function(a, b, x) {
+  a + b * x
+}
+rmsd_linear <- function(params, data) {
+  a <- params[1]; b <- params[2]
+  predicted <- linear_model(a, b, data$contrast)
+  sqrt(mean((data$prop_correct - predicted)^2))
+}
+fit_linear <- optim(par = c(a = 0.5, b = 0.5), fn = rmsd_linear, data = data)
+
+linear_model(fit_linear$par[1], fit_linear$par[2], 0)      # about 0.44
+linear_model(fit_linear$par[1], fit_linear$par[2], 1)      # about 1.05
+linear_model(fit_linear$par[1], fit_linear$par[2], 1.5)    # about 1.35
+linear_model(fit_linear$par[1], fit_linear$par[2], -0.5)   # about 0.14
+```
+
+At `contrast = 1`, the linear model already predicts *above* 1.0 -- more
+than 100% correct, which is impossible. Pushed further out to
+`contrast = 1.5`, it gets even more extreme (about 1.35). There's
+nothing stopping a straight line from continuing past 1 or below 0; it
+has no concept of a ceiling or floor.
+
+## Exercise 8 (discussion)
+
+```{r}
+psychometric_model(fit_rmsd$par[1], fit_rmsd$par[2], c(0, 1))
+```
+
+Yes -- the linear model's Exercise 7 prediction at `contrast = 1` (about
+1.05) is outside the range a proportion can actually take, and the same
+problem shows up (even more clearly) once you push past the tested range
+entirely, as at `contrast = 1.5`. The Weibull model, evaluated at the
+same two points, gives `0.5` at `contrast = 0` and something just under
+`1.0` at `contrast = 1` -- both perfectly valid proportions. The Weibull
+model can never do what the linear model just did, because it's built
+from a sigmoid: mathematically, `0.5 + 0.5*(1 - exp(-(x/alpha)^beta))`
+can only ever approach 0.5 or 1 as limits, no matter how extreme `x`
+gets -- it's structurally incapable of predicting an impossible
+proportion, which is exactly why the shape of a model, not just how well
+it fits the tested range, matters.
+
+## Exercise 9
+
+```{r}
+time_days <- c(0, 1, 2, 4, 7, 14, 21, 30)
+prop_recalled <- c(0.96, 0.88, 0.85, 0.76, 0.57, 0.35, 0.27, 0.14)
+forgetting_data <- data.frame(time_days, prop_recalled)
+
+forgetting_model <- function(a, b, t) {
+  a * exp(-b * t)
+}
+rmsd_forgetting <- function(params, data) {
+  a <- params[1]; b <- params[2]
+  predicted <- forgetting_model(a, b, data$time_days)
+  sqrt(mean((data$prop_recalled - predicted)^2))
+}
+fit_forgetting <- optim(par = c(a = 0.9, b = 0.05), fn = rmsd_forgetting, data = forgetting_data)
+
+t_half <- log(fit_forgetting$par[1] / 0.5) / fit_forgetting$par[2]
+t_half
+```
+
+You should get something close to **9.8 days** -- the "half-life" of
+this simulated memory. Checking against the data plot: recall is 0.57 at
+day 7 and 0.35 at day 14, so 0.5 genuinely falls between those two
+points -- 9.8 days is right where you'd expect it to land.
+
+## Exercise 10 (discussion)
+
+With the original target of 0.8:
+
+```{r}
+t_08 <- log(fit_forgetting$par[1] / 0.8) / fit_forgetting$par[2]
+t_08
+```
+
+You should get close to **2.7 days**. Checking against the data: recall
+is 0.85 at day 2 and 0.76 at day 4, so 0.8 genuinely falls between those
+two points -- a good sanity check that the fitted curve and the
+inference built on it are both behaving sensibly.
+
+If the fitted `a` had come out *below* the target proportion you're
+solving for: the formula would still compute a number (there's no
+division by zero or anything that literally breaks), but that number
+would come out *negative*. That's the model's way of saying the target
+proportion was already crossed *before* time zero -- a crossing point in
+the past, before learning even happened, which isn't a meaningful answer
+for a real forgetting curve. This is a useful general lesson: an
+inference computed from a fitted model is only as meaningful as whether
+the question you asked actually makes sense given the fit you got -- the
+algebra will still hand you a number even once the underlying question
+has stopped making sense, which is exactly why sanity-checking against
+the real data, like you just did, matters rather than trusting a formula
+blindly.
