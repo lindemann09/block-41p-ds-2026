@@ -36,13 +36,13 @@ v = rnorm(5, mean = 0, sd = 1)
 print(v)
 ```
 
-Generate 5 random numbers with a mean of 5 and a standard deviation of 2 and call the resulting mean and standard deviation of the generated numbers using the function `mean()` and `sd()`. Store the result in a variable called `data_a`.
+Generate 5 random numbers with a mean of 5 and a standard deviation of 2 and calculate the mean and standard deviation of the generated numbers using the function `mean()` and `sd()`.
 
 **Solution**:
 ```{r, message=FALSE}
-v = rnorm(5, mean = 5, sd = 2)
-mean(v)
-sd(v)
+x = rnorm(5, mean = 5, sd = 2)
+mean(x)
+sd(x)
 ```
 <!-- end of solution -->
 
@@ -137,19 +137,19 @@ hist(sampling_dist, main = "Sampling Distribution of the Median", xlab = "Median
 
 ### Exercise 5: Resampled Data
 
-Run the resampling multiple time and look at the histogram. Also increade and decrease  the number of resamples (e.g. 100 and 10000). Run it also multiple times and see how the resulting sampling behaves.
+**(a)**: Run the resampling multiple time and look at the histogram. Also increade and decrease  the number of resamples (e.g. 100 and 10000). Run it also multiple times and see how the resulting sampling behaves.
 
 How does the number of resamples affect the shape of the sampling distribution? What is the effect of the number of resamples when you run it multiple times?
 
 **Answer**: As the number of resamples increases, the shape of the sampling distribution becomes more stable (and closer to the true distribution of the median). With a small number of resamples, the distribution may be more variable and less representative of the true population. Running it multiple times with different numbers of resamples will show that larger sample sizes lead to more consistent and reliable estimates of the median.
 
-On what does the reproducibility of the sampling distribution depend?
+**(b)**: On what does the reproducibility of the sampling distribution depend?
 
 **Answer**: Just on the number of resamples. The reproducibility is defined as the ability to reproduce the same results when running the same analysis multiple times.
 
 ### Exercise 6: Sampling Distribution
 
-If you have the sampling distribution of the median for `t1`, you can calculate the confidence intervals for the median. Calculate 95% bootstrapped confidence intervals, which are based on the 2.5th and 97.5th percentiles (quantiles) of the sampling distribution (see slides).
+**(a)**: If you have the sampling distribution of the median for `t1`, you can calculate the confidence intervals for the median. Calculate 95% bootstrapped confidence intervals, which are based on the 2.5th and 97.5th percentiles (quantiles) of the sampling distribution (see slides).
 
 **Solution**:
 ```{r, message=FALSE}
@@ -157,7 +157,7 @@ quantile(sampling_dist, probs = c(0.025, 0.975))
 ```
 <!-- end of solution -->
 
-Calculate the 90% and 99% confidence intervals for the medians (`t1`).
+**(b)**: Calculate the 90% and 99% confidence intervals for the medians (`t1`).
 
 **Solution**:
 
@@ -179,7 +179,7 @@ quantile(sampling_dist, probs = c(0.05, 0.95))   # 90% CI
 
 Calculate the confidence intervals for the medians at all time points. copy, paste & modify the code:
 
-Bootstrapped confidence interval for `t2`:
+**(a)**: Bootstrapped confidence interval for `t2`:
 
 **Solution**:
 ```{r, message=FALSE}
@@ -193,7 +193,7 @@ quantile(sampling_dist_t2, probs = c(0.025, 0.975))
 ```
 <!-- end of solution -->
 
-Bootstrapped confidence interval for `t3`:
+**(b)**: Bootstrapped confidence interval for `t3`:
 
 **Solution**:
 ```{r, message=FALSE}
@@ -264,7 +264,6 @@ The effect is not significant.
 ### Exercise 9: Simulate ANOVA Data
 
 Let's make a simulation-based power analysis to estimate the power of the ANOVA with 30 participants per group.
-
 
 We simulate data and use the means and standard deviations from the real data (round to two decimal places). Please complete the code (`....`) to simulate a data set.
 
@@ -352,7 +351,8 @@ for (i in 1:1000) {
 
 
 ### Exercise 11: Simulation-based Power Analysis
-What the bootstrap power of the ANOVA with 30 participants per group?
+
+**(a)**: What the bootstrap power of the ANOVA with 30 participants per group?
 
 **Solution**:
 ```{r, message=FALSE}
@@ -360,15 +360,15 @@ sum(results) / length(results)
 ```
 <!-- end of solution -->
 
-Interpret the result. What does it mean?
+**(b)**: Interpret the result. What does it mean?
 
 **Answer**: the power is pritty low, below 50%. We usually aim for a power of 80% or higher. This means that with 30 participants per group, the ANOVA is not very likely to detect a true effect if it exists.
 
-### Exercise 12: Increase Sample Size
+### Exercise 12: A-priori Power Analysis
 
-What sample size do we need to reach a power of 80%, that is, to find in 80% of the cases an effect, if there is an effect?
+A-priori power analysis asks the question: What sample size do we need to reach a power of 80%. That is, how many subjects are needed that we find an effect with a 80% probability, if there is an effect in the real world?
 
-We can increase the power by increasing the sample size. What is the power if we have more participants per group? Change sample size of the simulated data and see how the power changes.
+**(a)**: We can increase the power by increasing the sample size. What is the power if we have more participants per group? Change sample size of the simulated data and see how the power changes.
 
 **Solution**:
 
@@ -406,6 +406,6 @@ for (sample_size in c(50, 60, 70, 80)) {
 ```
 <!-- end of solution -->
 
-How many participants per group do we need to reach a power of 80%?
+**(b)**: How many participants per group do we need to reach a power of 80%?
 
 **Answer**: We need about 70 participants per group to reach a power of 80%.

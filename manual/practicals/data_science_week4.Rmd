@@ -36,7 +36,7 @@ v = rnorm(5, mean = 0, sd = 1)
 print(v)
 ```
 
-Generate 5 random numbers with a mean of 5 and a standard deviation of 2 and call the resulting mean and standard deviation of the generated numbers using the function `mean()` and `sd()`. Store the result in a variable called `data_a`.
+Generate 5 random numbers with a mean of 5 and a standard deviation of 2 and calculate the mean and standard deviation of the generated numbers using the function `mean()` and `sd()`.
 
 ```{r, message=FALSE}
 #your code here
@@ -124,26 +124,26 @@ hist(sampling_dist, main = "Sampling Distribution of the Median", xlab = "Median
 
 ### Exercise 5: Resampled Data
 
-Run the resampling multiple time and look at the histogram. Also increade and decrease  the number of resamples (e.g. 100 and 10000). Run it also multiple times and see how the resulting sampling behaves.
+**(a)**: Run the resampling multiple time and look at the histogram. Also increade and decrease  the number of resamples (e.g. 100 and 10000). Run it also multiple times and see how the resulting sampling behaves.
 
 How does the number of resamples affect the shape of the sampling distribution? What is the effect of the number of resamples when you run it multiple times?
 
 
 
-On what does the reproducibility of the sampling distribution depend?
+**(b)**: On what does the reproducibility of the sampling distribution depend?
 
 
 
 ### Exercise 6: Sampling Distribution
 
-If you have the sampling distribution of the median for `t1`, you can calculate the confidence intervals for the median. Calculate 95% bootstrapped confidence intervals, which are based on the 2.5th and 97.5th percentiles (quantiles) of the sampling distribution (see slides).
+**(a)**: If you have the sampling distribution of the median for `t1`, you can calculate the confidence intervals for the median. Calculate 95% bootstrapped confidence intervals, which are based on the 2.5th and 97.5th percentiles (quantiles) of the sampling distribution (see slides).
 
 ```{r, message=FALSE}
 #your code here
 
 ```
 
-Calculate the 90% and 99% confidence intervals for the medians (`t1`).
+**(b)**: Calculate the 90% and 99% confidence intervals for the medians (`t1`).
 
 ```{r, message=FALSE}
 #your code here
@@ -154,14 +154,14 @@ Calculate the 90% and 99% confidence intervals for the medians (`t1`).
 
 Calculate the confidence intervals for the medians at all time points. copy, paste & modify the code:
 
-Bootstrapped confidence interval for `t2`:
+**(a)**: Bootstrapped confidence interval for `t2`:
 
 ```{r, message=FALSE}
 #your code here
 
 ```
 
-Bootstrapped confidence interval for `t3`:
+**(b)**: Bootstrapped confidence interval for `t3`:
 
 ```{r, message=FALSE}
 #your code here
@@ -217,7 +217,6 @@ The effect is not significant.
 
 Let's make a simulation-based power analysis to estimate the power of the ANOVA with 30 participants per group.
 
-
 We simulate data and use the means and standard deviations from the real data (round to two decimal places). Please complete the code (`....`) to simulate a data set.
 
 ```{r, eval=FALSE}
@@ -271,28 +270,29 @@ for (i in 1:......) {
 
 
 ### Exercise 11: Simulation-based Power Analysis
-What the bootstrap power of the ANOVA with 30 participants per group?
+
+**(a)**: What the bootstrap power of the ANOVA with 30 participants per group?
 
 ```{r, message=FALSE}
 #your code here
 
 ```
 
-Interpret the result. What does it mean?
+**(b)**: Interpret the result. What does it mean?
 
 
 
-### Exercise 12: Increase Sample Size
+### Exercise 12: A-priori Power Analysis
 
-What sample size do we need to reach a power of 80%, that is, to find in 80% of the cases an effect, if there is an effect?
+A-priori power analysis asks the question: What sample size do we need to reach a power of 80%. That is, how many subjects are needed that we find an effect with a 80% probability, if there is an effect in the real world?
 
-We can increase the power by increasing the sample size. What is the power if we have more participants per group? Change sample size of the simulated data and see how the power changes.
+**(a)**: We can increase the power by increasing the sample size. What is the power if we have more participants per group? Change sample size of the simulated data and see how the power changes.
 
 ```{r, message=FALSE}
 #your code here
 
 ```
 
-How many participants per group do we need to reach a power of 80%?
+**(b)**: How many participants per group do we need to reach a power of 80%?
 
 
