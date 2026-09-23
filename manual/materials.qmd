@@ -1,12 +1,10 @@
-## Literature
+## Suggested Readings
+
+### General
 
 - Farrell, S., & Lewandowsky, S. (2018). *Computational modeling of cognition and behavior.* Cambridge University Press. [eBook](https://eur.on.worldcat.org/oclc/1028902356)
 
-The links above point to the online resources of the literature. Books and articles that are not listed here can be downloaded from the Canvas page.
-
-Please note that some of the references are only accessible from the university campus. To access these materials from home, you need to set up a [VPN connection (on-campus simulation)](https://www.eur.nl/en/library/using-library/access-online-collection).
-
-## Suggested Readings
+### Topics
 
 1.  **Introduction 1: R Basics**
     - [R mini tutorial](r_basics/index.html)
@@ -23,11 +21,18 @@ Please note that some of the references are only accessible from the university 
 
 *The list is not complete and will be updated during the course.*
 
+The links above point to the online resources of the literature. Books and articles that are not listed here can be downloaded from the Canvas page.
+
+Please note that some of the references are only accessible from the university campus. To access these materials from home, you need to set up a [VPN connection (on-campus simulation)](https://www.eur.nl/en/library/using-library/access-online-collection).
+
+
+
+
 ## Additional Material
 
 - **Neural Networks by 3Blue1Brown:**
   - [But what is a neural network? \| Deep learning chapter 1](https://www.youtube.com/watch?v=aircAruvnKk)
   - [Gradient descent, how neural networks learn \| Deep learning chapter 2](https://www.youtube.com/watch?v=IHZwWFHWa-w)
   - [What is backpropagation really doing? \| Deep learning chapter 3](https://www.youtube.com/watch?v=Ilg3gGewQ5U)
-  
+
 *The list is not complete and will be updated during the course.*

@@ -26,8 +26,6 @@ This online course manual that contains all instructions and the important study
 visible_practicals = 3
 visible_solutions = 3
 visible_lectures = 3
-visible_assignments = 1
-visible_assignment_solutions = 0
 
 # practical_title = c(
 #   "Introduction 1: R basics",
@@ -159,32 +157,12 @@ cat("</br>")
 
 # Assignments
 
-Find below the assignments. The assignment have to be submitted via Canvas at the end of this block.
+The assignments are group assignments. Please form subgroups of two or three students. Every **group** has to do **one** assignment of their choice and submit it via Canvas at the **end of this block**. The assignments are not graded, but they are mandatory to pass the course.
 
-```{r}
-#| output: asis
-#| echo: false
-for (i in 1:visible_assignments)
-{
-  fl = paste0("data_science_assignment_", i, ".Rmd")
-  cat(paste0("[Assignment ", i, "](assignments/", fl, ") ([download](rmd/", fl, ")) </br>"))
-}
-cat("</br>")
-```
+* [Assignment 1: Parameter Estimation](assignments/data_science_assignment_1.Rmd) ([download](rmd/data_science_assignment_1.Rmd))
+* Assignment 2: Neural Networks (will appear after the lecture on Neural Networks)
 
+<!--
+**Solutions**
 
-```{r}
-#| output: asis
-#| echo: false
-if (visible_assignment_solutions == 0) {
-  cat("</br>")
-} else {
-  cat("**Solutions**\n\n")
-  for (i in 1:visible_solutions)
-  {
-    cat(paste0("[Solution Week ", i+2, "](practicals/data_science_week", i, "_assignment_solution.Rmd)&nbsp;&nbsp;&nbsp;&nbsp;"))
-  }
-}
-cat("</br>")
-```
-
+-->
