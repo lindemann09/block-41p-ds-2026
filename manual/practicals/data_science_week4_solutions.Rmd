@@ -38,19 +38,22 @@ print(v)
 
 Generate 5 random numbers with a mean of 5 and a standard deviation of 2 and call the resulting mean and standard deviation of the generated numbers using the function `mean()` and `sd()`. Store the result in a variable called `data_a`.
 
+**Solution**:
 ```{r, message=FALSE}
-#your code here
-
+v = rnorm(5, mean = 5, sd = 2)
+mean(v)
+sd(v)
 ```
+<!-- end of solution -->
 
 ### Exercise 2: Random Numbers
 **(a)** Re-run the code multiple times. Is it exactly the same? How close is the mean and standard deviation to the specified values of 5 and 2?
 
-
+**Answer**: The mean and standard deviation will vary each time you run the code, but they should be close to the specified values of 5 and 2. The exact values will depend on the random numbers generated in each run.
 
 **(b)** What happens if you change the sample size to e.g. 100, or 10,000? How does it change the mean and standard deviation? Or how robust are the mean and standard deviation of the distribution if you make new simulations with different sample sizes?
 
-
+**Answer**: As the sample size increases, the mean and standard deviation will become more stable and closer to the specified values of 5 and 2. With larger sample sizes, the variability in the estimates decreases, leading to more reliable results.
 
 ## Resampling
 
@@ -90,10 +93,13 @@ median(selfesteem$t1)
 
 Use the function to calculate the median and standard deviation of the self-esteem scores at time point 1 (`t2`, `t3`).
 
+**Solution**:
 ```{r, message=FALSE}
-#your code here
-
+median(selfesteem$t2)
+median(selfesteem$t3)
 ```
+
+<!-- end of solution -->
 
 
 ### Exercise 4: Resampling
@@ -111,10 +117,17 @@ for (i in 1:3) {
 
 The code above produces only very few resamples of the median. Change the code that you produce 1000 resample.
 
+**Solution**:
 ```{r, message=FALSE}
-#your code here
-
+sampling_dist = c()
+for (i in 1:3) {
+  resampled_dat = sample(selfesteem$t1, size=10, replace = TRUE)
+  median_resampled = median(resampled_dat)
+  sampling_dist = c(sampling_dist, median_resampled)
+}
 ```
+
+<!-- end of solution -->
 
 You can visualize the created sampling distribution `sampling_dist` using a histogram.
 
@@ -128,27 +141,39 @@ Run the resampling multiple time and look at the histogram. Also increade and de
 
 How does the number of resamples affect the shape of the sampling distribution? What is the effect of the number of resamples when you run it multiple times?
 
-
+**Answer**: As the number of resamples increases, the shape of the sampling distribution becomes more stable (and closer to the true distribution of the median). With a small number of resamples, the distribution may be more variable and less representative of the true population. Running it multiple times with different numbers of resamples will show that larger sample sizes lead to more consistent and reliable estimates of the median.
 
 On what does the reproducibility of the sampling distribution depend?
 
-
+**Answer**: Just on the number of resamples. The reproducibility is defined as the ability to reproduce the same results when running the same analysis multiple times.
 
 ### Exercise 6: Sampling Distribution
 
 If you have the sampling distribution of the median for `t1`, you can calculate the confidence intervals for the median. Calculate 95% bootstrapped confidence intervals, which are based on the 2.5th and 97.5th percentiles (quantiles) of the sampling distribution (see slides).
 
+**Solution**:
 ```{r, message=FALSE}
-#your code here
-
+quantile(sampling_dist, probs = c(0.025, 0.975))
 ```
+<!-- end of solution -->
 
 Calculate the 90% and 99% confidence intervals for the medians (`t1`).
 
-```{r, message=FALSE}
-#your code here
+**Solution**:
 
+E.g.: The lower and higher bounds of the 99% confidence intervals are
+
+```{r, message=FALSE}
+low = (1 - 0.99)/2
+high = 1 - low
+print(c(low, high))
 ```
+
+```{r, message=FALSE}
+quantile(sampling_dist, probs = c(0.005, 0.995)) # 99% CI
+quantile(sampling_dist, probs = c(0.05, 0.95))   # 90% CI
+```
+<!-- end of solution -->
 
 ### Exercise 7: Confidence Intervals
 
@@ -156,17 +181,31 @@ Calculate the confidence intervals for the medians at all time points. copy, pas
 
 Bootstrapped confidence interval for `t2`:
 
+**Solution**:
 ```{r, message=FALSE}
-#your code here
-
+sampling_dist_t2 = c()
+for (i in 1:1000) { # of course, you could sample more
+  resampled_dat = sample(selfesteem$t2, size=10, replace = TRUE)
+  median_resampled = median(resampled_dat)
+  sampling_dist_t2 = c(sampling_dist_t2, median_resampled)
+}
+quantile(sampling_dist_t2, probs = c(0.025, 0.975))
 ```
+<!-- end of solution -->
 
 Bootstrapped confidence interval for `t3`:
 
+**Solution**:
 ```{r, message=FALSE}
-#your code here
-
+sampling_dist_t3 = c()
+for (i in 1:1000) {
+  resampled_dat = sample(selfesteem$t3, size=10, replace = TRUE)
+  median_resampled = median(resampled_dat)
+  sampling_dist_t3 = c(sampling_dist_t3, median_resampled)
+}
+quantile(sampling_dist_t3, probs = c(0.025, 0.975))
 ```
+<!-- end of solution -->
 
 
 ### Exercise 8: Example Data
@@ -191,10 +230,19 @@ plt  = Boxplot(math_anxiety_dat, main = "Math Anxiety Scores", ylab = "Math Anxi
 
 Calculate the means and standard deviations for psychology, sport science and medicine:
 
-```{r, message=FALSE}
-#your code here
+**Solution**:
 
+Means
+```{r, message=FALSE}
+c(mean(math_anxiety_dat$psychology), mean(math_anxiety_dat$sport_science), mean(math_anxiety_dat$medicine))
 ```
+
+Standard deviations
+
+```{r, message=FALSE}
+c(sd(math_anxiety_dat$psychology), sd(math_anxiety_dat$sport_science), sd(math_anxiety_dat$medicine))
+```
+<!-- end of solution -->
 
 ### ANOVA is R
 
@@ -227,10 +275,15 @@ anxiety_simulated = data.frame(
   medicine      = rnorm(...., ...., ....))
 ```
 
-```{r, message=FALSE}
-#your code here
-
+**Solution**:
+```{r, eval=TRUE}
+anxiety_simulated = data.frame(
+  psychology    = rnorm(n=30, mean=4.40, sd=1.17),
+  sport_science = rnorm(n=30, mean=4.23, sd=0.99),
+  medicine      = rnorm(n=30, mean=3.85, sd=0.96))
 ```
+
+<!-- end of solution -->
 
 ### Exercise 10: Simulation ANOVAs Outcomes
 
@@ -264,23 +317,52 @@ for (i in 1:......) {
 ```
 
 
-```{r, message=FALSE}
-#your code here
+**Solution**:
 
+```{r, message=FALSE}
+results = c()
+for (i in 1:1000) {
+  # 1. simulation
+  anxiety_simulated = data.frame(
+    psychology    = rnorm(n=30, mean=4.40, sd=1.17),
+    sport_science = rnorm(n=30, mean=4.23, sd=0.99),
+    medicine      = rnorm(n=30, mean=3.85, sd=0.96))
+
+  # 2. perform ANOVA
+  anova_dat = pivot_longer(anxiety_simulated,
+                           cols = everything(),
+                           names_to = "faculty",
+                           values_to = "anxiety")
+  anova_dat$id = 1:nrow(anova_dat)
+  res = aov_ez(id ="id", dv = "anxiety", between = "faculty",
+                data = anova_dat)
+
+  # get the p-value from the results
+  p_value = res$anova_table$`Pr(>F)`
+
+   # 3. check significance
+  is_sig = p_value < 0.05
+
+  # store the result
+  results = c(results, is_sig)
+}
 ```
+
+<!-- end of solution -->
 
 
 ### Exercise 11: Simulation-based Power Analysis
 What the bootstrap power of the ANOVA with 30 participants per group?
 
+**Solution**:
 ```{r, message=FALSE}
-#your code here
-
+sum(results) / length(results)
 ```
+<!-- end of solution -->
 
 Interpret the result. What does it mean?
 
-
+**Answer**: the power is pritty low, below 50%. We usually aim for a power of 80% or higher. This means that with 30 participants per group, the ANOVA is not very likely to detect a true effect if it exists.
 
 ### Exercise 12: Increase Sample Size
 
@@ -288,11 +370,42 @@ What sample size do we need to reach a power of 80%, that is, to find in 80% of 
 
 We can increase the power by increasing the sample size. What is the power if we have more participants per group? Change sample size of the simulated data and see how the power changes.
 
-```{r, message=FALSE}
-#your code here
+**Solution**:
 
+```{r, message=FALSE}
+for (sample_size in c(50, 60, 70, 80)) {
+  results = c()
+  for (i in 1:1000) {
+    # 1. simulation
+    anxiety_simulated = data.frame(
+      psychology    = rnorm(n=sample_size, mean=4.40, sd=1.17),
+      sport_science = rnorm(n=sample_size, mean=4.23, sd=0.99),
+      medicine      = rnorm(n=sample_size, mean=3.85, sd=0.96))
+
+    # 2. perform ANOVA
+    anova_dat = pivot_longer(anxiety_simulated,
+                             cols = everything(),
+                             names_to = "faculty",
+                             values_to = "anxiety")
+    anova_dat$id = 1:nrow(anova_dat)
+    res = aov_ez(id ="id", dv = "anxiety", between = "faculty",
+                  data = anova_dat)
+
+    # get the p-value from the results
+    p_value = res$anova_table$`Pr(>F)`
+
+     # 3. check significance
+    is_sig = p_value < 0.05
+
+    # store the result
+    results = c(results, is_sig)
+  }
+  power_estimate = sum(results) / length(results)
+  cat("Estimated power with sample size", sample_size, ":", power_estimate, "\n")
+}
 ```
+<!-- end of solution -->
 
 How many participants per group do we need to reach a power of 80%?
 
-
+**Answer**: We need about 70 participants per group to reach a power of 80%.

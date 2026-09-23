@@ -33,6 +33,8 @@ jobs:
             any::knitr
             any::rmarkdown
             any::tidyverse
+            any::car
+            any::afex
             any::webexercises
             any::praise
 
