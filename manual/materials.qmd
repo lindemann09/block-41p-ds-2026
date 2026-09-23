@@ -13,10 +13,13 @@
 3.  **Parameter Estimation**
     - Chapter 2 of Farrell & Lewandowsky (2018), pages: 47 - 61.
     - Prince, S. J. D. (2023). Supervised learning. In [Understanding Deep Learning](https://udlbook.github.io/udlbook/) (pp. 17–24). MIT Press.
-4.  **Neural Networks 1**
+4. **Resampling & Monte Carlo Methods**
+    - Chapter 2 of Farrell & Lewandowsky (2018), pages: 65 - 70.
+    - Hesterberg, T., Monaghan, S., Moore, D. S., Clipson, A., & Epstein, R. (2003). [Bootstrap methods and permutation tests.](https://nhorton.people.amherst.edu/ips9/IPS_09_Ch16.pdf) In D. S. Moore, G. P. McCabe, W. M. Duckworth, & S. L. Sclove, *The practice of business statistics: Using data for decisions*. W. H. Freeman.
+5.  **Neural Networks 1**
     - Hinton, G. E. (1992). How neural networks learn from experience. Scientific American, 267(3), 144-151.
     - Prince, S. J. D. (2023). Shallow neural networks. In [Understanding Deep Learning](https://udlbook.github.io/udlbook/) (pp. 25–40). MIT Press.
-5.  **Neural Networks 2**
+6.  **Neural Networks 2**
     - Section 13.2 (backpropogation) of Farrell & Lewadowsky (2018)
 
 *The list is not complete and will be updated during the course.*
