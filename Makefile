@@ -13,11 +13,12 @@ manual:
 	cp -r r_basics/_book _build/r_basics
 	# make rmd_downloads
 	cp -r manual/practicals/ _build/rmd/
-	cp -r manual/assignments/ _build/rmd/
+	cp -vr manual/assignments/* _build/rmd/
+	ls _build/rmd
 
 install_requirements:
 	Rscript -e 'options(repos = c(CRAN = "https://cran.uni-muenster.de"))' \
-			-e ' install.packages(c("rmarkdown", "knitr", "tidyverse", "webexercises", "praise"))'
+			-e ' install.packages(c("rmarkdown", "knitr", "tidyverse", "webexercises", "afex","praise"))'
 
 clean:
 	rm -Rf _build
