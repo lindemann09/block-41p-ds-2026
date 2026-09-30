@@ -1,6 +1,6 @@
 ---
-title: "Week 3: Resampling & Monte Carlo Methods"
-subtitle: "How Randomness can help us Understand the World"
+title: "Practical 4: Supervised Learning"
+subtitle: "Basic Methods for Fitting a Model to Data"
 output:
   html_document:
     toc: true
@@ -8,291 +8,334 @@ format:
   html:
     toc: true
     toc-expand: 2
+editor_options:
+  markdown:
+    wrap: 72
 ---
 
-## Install packages
+## Before you start
 
-This exercise requires the packages `car`, `tidyr` and `afex`. You need to install the packages once on your computer. To do this, you please run the following code, once on the console (copy & paste)
+In the lecture you fit a Weibull-based psychometric function to 2AFC
+contrast-detection data using RMSD. This practical has you use that same
+pipeline in three different ways: recovering known parameters from
+simulated data, comparing the Weibull model against a plain linear
+model, and fitting a completely different psychometric curve (a
+forgetting curve) and using the fitted model to answer a real question,
+not just report a fit.
 
-`install.packages(c("afex", "car", "tidyr"))`
+Most of the code below is already written for you. Your job in each
+exercise is usually to **run it, then change something** — a parameter
+value, a data value, a starting point — and see what happens. You don't
+need to understand every line of R syntax perfectly; focus on
+understanding *what changing that one value actually does*. If something
+errors, re-check you've run all the chunks above it in order.
 
-Before you start the exercises, please always load the required packages by running the following code:
+## Part 0: The data
 
-```{r, message=FALSE}
-library("afex")
-library("car")
-library("tidyverse")
+Same 2AFC contrast-detection setup as the lecture: on each trial, a
+participant says which of two intervals contained the stimulus, at one
+of nine contrast levels, 40 trials per level.
+
+```{r}
+contrast <- seq(0, 1, 0.12)
+n_trials <- rep(40, 9)
+n_correct <- c(16, 25, 23, 24, 25, 36, 37, 38, 40)
+prop_correct <- n_correct / n_trials
+
+data <- data.frame(contrast, n_correct, n_trials, prop_correct)
+data
 ```
 
-##  Randomness
-Randomness is a fundamental concept in statistics and data science. It plays a crucial role in many areas, including simulation, sampling, and hypothesis testing.
-
-### Exercise 1: Random Numbers
-
-You can generate 10 random numbers from a normal distribution in R using the `rnorm()` function. The result is stored in the variable `v`.
-
-```{r, message=FALSE}
-v = rnorm(5, mean = 0, sd = 1)
-print(v)
+```{r}
+old_par <- par(pty = "s")
+plot(data$contrast, data$prop_correct, pch = 19,
+     xlim = c(0, 1), ylim = c(0.4, 1),
+     xlab = "Stimulus contrast", ylab = "Proportion correct",
+     main = "Psychometric function")
+par(old_par)
 ```
 
-Generate 5 random numbers with a mean of 5 and a standard deviation of 2 and calculate the mean and standard deviation of the generated numbers using the function `mean()` and `sd()`.
+## Part 1: A first guess, by eye
 
-```{r, message=FALSE}
-#your code here
+### Exercise 1
 
-```
+Looking at the plot above, write down your own rough guess for `alpha`
+and `beta` — where does the curve look like it crosses roughly 75%
+correct (`alpha`), and how steep does the rise look (`beta`)? There's no
+single right answer here; this is just a benchmark to compare against
+later.
 
-### Exercise 2: Random Numbers
-**(a)** Re-run the code multiple times. Is it exactly the same? How close is the mean and standard deviation to the specified values of 5 and 2?
+## Part 2: How wrong is a guess? — RMSD
 
+Here are `psychometric_model()` and `rmsd()`, exactly as covered in the
+lecture:
 
+```{r}
+psychometric_model <- function(alpha, beta, x) {
+  y <- rep(0, length(x))
+  valid <- x >= 0
+  y[valid] <- 0.5 + 0.5*(1 - exp(-(x[valid] / alpha)^beta))
+  y
+}
 
-**(b)** What happens if you change the sample size to e.g. 100, or 10,000? How does it change the mean and standard deviation? Or how robust are the mean and standard deviation of the distribution if you make new simulations with different sample sizes?
-
-
-
-## Resampling
-
-The dataset below contains 10 individuals' self-esteem score on three time points during a specific diet to determine whether their self-esteem improved.
-
-We load the data `selfesteem`:
-
-
-```{r, message=FALSE}
-dat_text = "
-id       t1       t2       t3
-1 400.5027 518.2286 710.7831
-2 255.8124 691.2915 630.8434
-3 324.4241 444.3434 977.8410
-4 341.9538 471.1696 834.7124
-5 287.1243 390.8429 645.7287
-6 204.5868 534.0549 665.3224
-7 352.5992 558.0695 684.0157
-8 317.9425 437.0234 781.8623
-9 350.7964 439.9808 847.1229
-10 304.3798 448.9376 858.1100
-"
-selfesteem = read.table(text=dat_text, header = TRUE)
-```
-
-The data look like this:
-```{r, message=FALSE}
-plt  = Boxplot(selfesteem[c("t1", "t2", "t3")], main = "Boxplot of Self-Esteem Scores", ylab = "Self-Esteem Score")
-```
-
-### Exercise 3: Median
-
-The median for `t1`is calculated like this:
-```{r, message=FALSE}
-median(selfesteem$t1)
-```
-
-Use the function to calculate the median and standard deviation of the self-esteem scores at time point 1 (`t2`, `t3`).
-
-```{r, message=FALSE}
-#your code here
-
-```
-
-
-### Exercise 4: Resampling
-
-We want to calculate the confidence intervals for the medians at all time points. To do this, we will use bootstrapping to estimate the sampling distribution of the median.
-
-```{r, message=FALSE}
-sampling_dist = c()
-for (i in 1:3) {
-  resampled_dat = sample(selfesteem$t1, size=10, replace = TRUE)
-  median_resampled = median(resampled_dat)
-  sampling_dist = c(sampling_dist, median_resampled)
+rmsd <- function(params, data) {
+  alpha <- params[1]; beta <- params[2]
+  predicted <- psychometric_model(alpha, beta, data$contrast)
+  sqrt(mean((data$prop_correct - predicted)^2))
 }
 ```
 
-The code above produces only very few resamples of the median. Change the code that you produce 1000 resample.
+### Exercise 2
 
-```{r, message=FALSE}
-#your code here
+Try `rmsd()` on your own Exercise 1 guess:
 
+```{r}
+rmsd(c(alpha = 0.5, beta = 3), data)   # replace 0.5 and 3 with your own guess
 ```
 
-You can visualize the created sampling distribution `sampling_dist` using a histogram.
+Now try a few more combinations by changing the numbers above and
+re-running — including at least one combination you're confident is a
+*bad* fit. Does `rmsd()` give a clearly higher number for it, as you'd
+expect?
 
-```{r, message=FALSE}
-hist(sampling_dist, main = "Sampling Distribution of the Median", xlab = "Median", nclass = 10, col = "lightblue")
+## Part 3: Grid search
+
+Here's a grid search over candidate `(alpha, beta)` pairs:
+
+```{r}
+alpha_vals <- seq(0.01, 1, length.out = 100)
+beta_vals <- seq(0.1, 6, length.out = 100)
+grid <- expand.grid(alpha = alpha_vals, beta = beta_vals)
+grid$rmsd <- apply(grid, 1, function(row) rmsd(row, data))
+best <- grid[which.min(grid$rmsd), ]
+best
 ```
 
-### Exercise 5: Resampled Data
+Here's what that whole grid looks like, all 10,000 combinations at once
+— lighter means a better (lower-RMSD) fit:
 
-**(a)**: Run the resampling multiple time and look at the histogram. Also increade and decrease  the number of resamples (e.g. 100 and 10000). Run it also multiple times and see how the resulting sampling behaves.
-
-How does the number of resamples affect the shape of the sampling distribution? What is the effect of the number of resamples when you run it multiple times?
-
-
-
-**(b)**: On what does the reproducibility of the sampling distribution depend?
-
-
-
-### Exercise 6: Sampling Distribution
-
-**(a)**: If you have the sampling distribution of the median for `t1`, you can calculate the confidence intervals for the median. Calculate 95% bootstrapped confidence intervals, which are based on the 2.5th and 97.5th percentiles (quantiles) of the sampling distribution (see slides).
-
-```{r, message=FALSE}
-#your code here
-
+```{r}
+rmsd_matrix <- matrix(grid$rmsd, nrow = length(alpha_vals), ncol = length(beta_vals))
+image(alpha_vals, beta_vals, rmsd_matrix, xlab = "alpha", ylab = "beta",
+      main = "RMSD across the grid", col = hcl.colors(50, "Blues", rev = TRUE))
+contour(alpha_vals, beta_vals, rmsd_matrix, add = TRUE, nlevels = 8)
+points(best$alpha, best$beta, pch = 4, col = "red", lwd = 2, cex = 1.5)
 ```
 
-**(b)**: Calculate the 90% and 99% confidence intervals for the medians (`t1`).
+The red X marks `best` — the single lightest point, exactly where the
+contour lines close in around a minimum. This is the same "cost surface"
+idea from the lecture, just for this dataset's own grid.
 
-```{r, message=FALSE}
-#your code here
+### Exercise 3
 
+The range searched matters. Change `alpha_vals` above to
+`seq(0.7, 1, length.out = 50)` — a range that deliberately excludes
+where you'd expect the true best-fitting `alpha` to be — and re-run the
+whole chunk. What does `best` give you now? Is the reported RMSD better
+or worse than before? What does this tell you about grid search's
+biggest limitation: it can only ever report the best point *within the
+range you gave it*, with no way to warn you that a better answer might
+exist outside that range. (Change `alpha_vals` back to the original
+`seq(0.01, 1, length.out = 100)` before moving on.)
+
+## Part 4: Automatic search with `optim()`
+
+```{r}
+fit_rmsd <- optim(par = c(alpha = 0.02, beta = 5.5), fn = rmsd, data = data)
+fit_rmsd$par
+fit_rmsd$value
 ```
 
-### Exercise 7: Confidence Intervals
+### Exercise 4
 
-Calculate the confidence intervals for the medians at all time points. copy, paste & modify the code:
+Change the starting point above — `par = c(alpha = 0.02, beta = 5.5)` —
+to a couple of other values of your choosing, and re-run. Does `optim()`
+still land on essentially the same answer every time? This particular
+starting point is a deliberately extreme one — the model's predictions
+are already flattened out to near-1.0 everywhere except `contrast = 0` —
+and it's worth noting `optim()` still finds its way to the right answer
+despite that. (Leave the chunk on this starting point, saved as
+`fit_rmsd`, before moving on — you'll need it later in the practical.)
 
-**(a)**: Bootstrapped confidence interval for `t2`:
+## Part 5: Simulating your own data
 
-```{r, message=FALSE}
-#your code here
+A dataset you didn't generate yourself can only tell you whether your
+fitting method finds *some* consistent minimum — not whether that
+minimum is actually the *true* parameters. Simulating your own data,
+with known "true" values, lets you check that.
 
+```{r}
+set.seed(99)
+contrast_sim <- seq(0, 1, 0.12)
+true_alpha <- 0.5
+true_beta  <- 2.5
+p_true <- psychometric_model(true_alpha, true_beta, contrast_sim)
+
+n_trials_sim <- rep(40, 9)
+n_correct_sim <- rbinom(length(contrast_sim), n_trials_sim, p_true)
+prop_correct_sim <- n_correct_sim / n_trials_sim
+
+data_sim <- data.frame(contrast = contrast_sim, n_correct = n_correct_sim,
+                        n_trials = n_trials_sim, prop_correct = prop_correct_sim)
+data_sim
 ```
 
-**(b)**: Bootstrapped confidence interval for `t3`:
+```{r}
+fit_sim <- optim(par = c(alpha = 0.3, beta = 1), fn = rmsd, data = data_sim)
+fit_sim$par                # compare this to true_alpha / true_beta above
+c(true_alpha = true_alpha, true_beta = true_beta)
 
-```{r, message=FALSE}
-#your code here
-
+x_seq <- seq(0, 1, length.out = 200)
+plot(data_sim$contrast, data_sim$prop_correct, pch = 19,
+     xlab = "Contrast", ylab = "Proportion correct", ylim = c(0, 1))
+lines(x_seq, psychometric_model(fit_sim$par[1], fit_sim$par[2], x_seq), col = "blue")
 ```
 
+### Exercise 5
 
-### Exercise 8: Example Data
+Change `true_alpha` and `true_beta` above to a few different
+combinations of your own choosing, and re-run both chunks each time (the
+`set.seed(99)` line keeps the random noise reproducible, so you can
+compare fairly). Does `fit_sim$par` stay close to your new true values
+every time? Now specifically try a very small `true_alpha`, like `0.05`
+— what happens to the shape of the simulated data, and does recovery
+still work as well? (Set `true_alpha` and `true_beta` back to `0.5` and
+`2.5` before moving on.)
 
-We examine the mathematica anxiety of students from different faculties. Low values indicate low anxiety, high values indicate high anxiety. The data contain the following columns:
+### Exercise 6 (interpretation)
 
-- `subject_id`: The ID of the subject
-- `faculty`: The faculty the subject belongs to
-- `anxiety`: The level of anxiety
+With `true_alpha = 0.5, true_beta = 2.5` restored, compare this
+simulated participant's fitted `alpha` to the real Part 0–4
+participant's `fit_rmsd$par`. Which participant is more *sensitive*
+overall (reaches a given detection level at lower contrast)? Which
+participant's responses are more *reliable* around their own threshold
+(steeper `beta`)? These are two genuinely separate psychological
+questions — a participant can be sensitive but inconsistent, or
+insensitive but very reliable in their own way.
 
-We download the data into the data frame called `math_anxiety_dat`:
+## Part 6: Does the shape of the model matter?
 
-```{r, message=FALSE}
-url = "https://raw.githubusercontent.com/lindemann09/block-41p-ds-2026/refs/heads/main/data/math_anxiety.csv"
-math_anxiety_dat =read.csv(url)
-head(math_anxiety_dat)
-```
+Here's a plain linear model fit to the same data, alongside the Weibull
+fit from Part 4:
 
-```{r, message=FALSE}
-plt  = Boxplot(math_anxiety_dat, main = "Math Anxiety Scores", ylab = "Math Anxiety Score")
-```
-
-Calculate the means and standard deviations for psychology, sport science and medicine:
-
-```{r, message=FALSE}
-#your code here
-
-```
-
-### ANOVA is R
-
-This is the code for a one-way ANOVA to test for differences between the three groups:
-
-```{r, message=FALSE}
-# create dataframe for anova (data have to be in long format and an id column is needed)
-anova_dat = pivot_longer(math_anxiety_dat,
-          cols = everything(),
-          names_to = "faculty",
-          values_to = "anxiety")
-anova_dat$id = 1:nrow(anova_dat)
-res = aov_ez(id ="id", dv = "anxiety", between = "faculty", data = anova_dat)
-print(res)
-```
-
-The effect is not significant.
-
-### Exercise 9: Simulate ANOVA Data
-
-Let's make a simulation-based power analysis to estimate the power of the ANOVA with 30 participants per group.
-
-We simulate data and use the means and standard deviations from the real data (round to two decimal places). Please complete the code (`....`) to simulate a data set.
-
-```{r, eval=FALSE}
-anxiety_simulated = data.frame(
-  psychology    = rnorm(...., ...., ....),
-  sport_science = rnorm(...., ...., ....),
-  medicine      = rnorm(...., ...., ....))
-```
-
-```{r, message=FALSE}
-#your code here
-
-```
-
-### Exercise 10: Simulation ANOVAs Outcomes
-
-Simulate 1000 data sets and calculate the proportion of significant results (p < 0.05) to estimate the power of the ANOVA with 30 participants per group.
-
-Please complete the code (`....`) correctly:
-
-```{r, eval=FALSE, message=FALSE}
-results = c()
-for (i in 1:......) {
-  # 1. simulation
-  anxiety_simulated = ......
-
-  # 2. perform ANOVA
-  anova_dat = pivot_longer(anxiety_simulated,
-                           cols = everything(),
-                           names_to = "faculty",
-                           values_to = "anxiety")
-  anova_dat$id = 1:nrow(anova_dat)
-  res = aov_ez(id ="id", dv = "anxiety", between = "faculty",
-                data = anova_dat)
-  # get the p-value from the results
-  p_value = res$anova_table$`Pr(>F)`
-
-   # 3. check significance
-  is_sig =  .......
-
-  # store the result
-  results = c(results, is_sig)
+```{r}
+linear_model <- function(a, b, x) {
+  a + b * x
 }
+
+rmsd_linear <- function(params, data) {
+  a <- params[1]; b <- params[2]
+  predicted <- linear_model(a, b, data$contrast)
+  sqrt(mean((data$prop_correct - predicted)^2))
+}
+
+fit_linear <- optim(par = c(a = 0.5, b = 0.5), fn = rmsd_linear, data = data)
+fit_linear$par
+fit_linear$value
+fit_rmsd$value
 ```
 
+```{r}
+plot(data$contrast, data$prop_correct, pch = 19, ylim = c(-0.2, 1.2),
+     xlab = "Contrast", ylab = "Proportion correct")
 
-```{r, message=FALSE}
-#your code here
-
+x_seq <- seq(0, 1, length.out = 200)
+lines(x_seq, psychometric_model(fit_rmsd$par[1], fit_rmsd$par[2], x_seq), col = "darkgreen")
+lines(x_seq, linear_model(fit_linear$par[1], fit_linear$par[2], x_seq), col = "blue")
+abline(h = c(0, 1), lty = "dotted")
+legend("topleft", legend = c("Weibull fit", "Linear fit"),
+       col = c("darkgreen", "blue"), lty = 1)
 ```
 
+### Exercise 7
 
-### Exercise 11: Simulation-based Power Analysis
+Using `linear_model()` and `fit_linear$par` above, compute the linear
+model's predicted proportion correct at `contrast = 0` and at
+`contrast = 1`:
 
-**(a)**: What the bootstrap power of the ANOVA with 30 participants per group?
-
-```{r, message=FALSE}
-#your code here
-
+```{r}
+linear_model(fit_linear$par[1], fit_linear$par[2], 0)
+linear_model(fit_linear$par[1], fit_linear$par[2], 1.5)
 ```
 
-**(b)**: Interpret the result. What does it mean?
+Now try `contrast = 1.5` and `contrast = -0.5` — values outside anything
+actually tested. What do you notice about these predicted values
+compared to what a real proportion can be?
 
+### Exercise 8 (discussion)
 
+Is either of the Exercise 7 predictions at `contrast = 0` or
+`contrast = 1` outside the range a proportion can actually take? What
+does the Weibull model do instead at those same two points (try
+`psychometric_model(fit_rmsd$par[1], fit_rmsd$par[2], c(0, 1))`
+yourself), and why can it never do what the linear model just did?
 
-### Exercise 12: A-priori Power Analysis
+## Part 7: The forgetting curve — fit it, then use it
 
-A-priori power analysis asks the question: What sample size do we need to reach a power of 80%. That is, how many subjects are needed that we find an effect with a 80% probability, if there is an effect in the real world?
+Everything so far has been about detecting a stimulus. This last part
+applies the exact same fitting machinery to a completely different
+psychological phenomenon: how memory for a learned item decays over time
+— the classic **forgetting curve**.
 
-**(a)**: We can increase the power by increasing the sample size. What is the power if we have more participants per group? Change sample size of the simulated data and see how the power changes.
+```{r}
+time_days <- c(0, 1, 2, 4, 7, 14, 21, 30)
+prop_recalled <- c(0.96, 0.88, 0.85, 0.76, 0.57, 0.35, 0.27, 0.14)
+forgetting_data <- data.frame(time_days, prop_recalled)
 
-```{r, message=FALSE}
-#your code here
-
+plot(forgetting_data$time_days, forgetting_data$prop_recalled, pch = 19,
+     xlab = "Days since learning", ylab = "Proportion recalled", ylim = c(0, 1))
 ```
 
-**(b)**: How many participants per group do we need to reach a power of 80%?
+We'll model this with a classic two-parameter exponential forgetting
+curve, $p(t) = a \cdot e^{-b \cdot t}$, where `a` is the (estimated)
+proportion recalled at time zero and `b` is the decay rate:
 
+```{r}
+forgetting_model <- function(a, b, t) {
+  a * exp(-b * t)
+}
 
+rmsd_forgetting <- function(params, data) {
+  a <- params[1]; b <- params[2]
+  predicted <- forgetting_model(a, b, data$time_days)
+  sqrt(mean((data$prop_recalled - predicted)^2))
+}
+
+fit_forgetting <- optim(par = c(a = 0.9, b = 0.05), fn = rmsd_forgetting, data = forgetting_data)
+fit_forgetting$par
+```
+
+```{r}
+plot(forgetting_data$time_days, forgetting_data$prop_recalled, pch = 19,
+     xlab = "Days since learning", ylab = "Proportion recalled", ylim = c(0, 1))
+
+t_seq <- seq(0, 30, length.out = 200)
+lines(t_seq, forgetting_model(fit_forgetting$par[1], fit_forgetting$par[2], t_seq), col = "blue")
+```
+
+Here's the actual inference question: **how many days pass before recall
+drops to 0.8 (80%)?** Setting $p(t) = 0.8$ and solving for $t$ gives
+$t = \ln(a/0.8)/b$:
+
+```{r}
+t_08 <- log(fit_forgetting$par[1] / 0.8) / fit_forgetting$par[2]
+t_08
+```
+
+### Exercise 9
+
+Change the `0.8` in the formula above to `0.5` instead — the time until
+recall drops to *half* its initial level, sometimes called a
+"half-life." Recompute `t_08` (or rename it if you like) with this new
+target. Does the resulting number of days make sense relative to the
+data plot above?
+
+### Exercise 10 (discussion)
+
+With the original target of 0.8: sanity-check your Exercise-9-style
+answer against the raw data plot — does the time you calculated fall in
+a sensible place relative to where the observed points cross that
+target? What would it mean, mathematically, if your fitted `a` had come
+out *below* the target proportion you were solving for? (Think about
+what the formula would do in that case, and whether the result would
+make sense for a real forgetting curve.)
