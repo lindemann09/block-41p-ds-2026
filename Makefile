@@ -17,7 +17,7 @@ manual:
 
 install_requirements:
 	Rscript -e 'options(repos = c(CRAN = "https://cran.uni-muenster.de"))' \
-			-e ' install.packages(c("rmarkdown", "knitr", "tidyverse", "webexercises", "afex", "praise"))'
+			-e ' install.packages(c("rmarkdown", "knitr", "tidyverse", "webexercises", "afex", "car", "praise"))'
 
 clean:
 	rm -Rf _build
