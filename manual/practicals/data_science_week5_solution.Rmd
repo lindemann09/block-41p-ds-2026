@@ -1,0 +1,383 @@
+---
+title: "Week 4: Neural Networks 1 -- Solutions"
+output:
+  html_document:
+    toc: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+> Posted a few days after the session. Try the exercises yourself first
+> -- the value is in getting stuck, not in reading the answer.
+
+## Setup (from the handout)
+
+```{r}
+roundness  <- c(0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.3,
+                0.2, 0.15, 0.25, 0.3, 0.35, 0.4, 0.45, 0.7)
+elongation <- c(0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.75,
+                0.7, 0.8, 0.75, 0.65, 0.6, 0.55, 0.5, 0.2)
+symmetry   <- c(0.82, 0.78, 0.88, 0.74, 0.69, 0.64, 0.58, 0.32,
+                0.28, 0.22, 0.30, 0.36, 0.42, 0.46, 0.50, 0.60)
+category   <- c(1, 1, 1, 1, 1, 1, 1, 1,
+                0, 0, 0, 0, 0, 0, 0, 0)
+data <- data.frame(roundness, elongation, symmetry, category)
+
+sigmoid <- function(x) {
+  1 / (1 + exp(-x))
+}
+perceptron <- function(weights, bias, x) {
+  sigmoid(sum(weights * x) + bias)
+}
+rmsd <- function(weights, bias, data, feature_names) {
+  X <- as.matrix(data[, feature_names])
+  predicted <- apply(X, 1, function(x) perceptron(weights, bias, x))
+  sqrt(mean((data$category - predicted)^2))
+}
+```
+
+## Exercise 1
+
+```{r}
+plot(data$roundness, data$symmetry, pch = 19,
+     col = ifelse(data$category == 1, "steelblue", "darkorange"),
+     xlab = "Roundness", ylab = "Symmetry")
+```
+
+The two categories separate nearly as cleanly on roundness-vs-symmetry
+as they did on roundness-vs-elongation -- Category A (blue) sits in the
+high-roundness, high-symmetry corner, Category B (orange) in the
+opposite corner. Symmetry looks like it's carrying broadly the same
+information as elongation for this dataset, rather than adding an
+independent third dimension of separation -- worth keeping in mind for
+Exercise 8, where you can check this more directly.
+
+## Exercise 2
+
+There's no single expected answer -- this is exploratory. Weights with a
+large positive value on roundness and a large negative value on
+elongation (matching how the categories were constructed) reliably push
+the output toward 1 for Category-A-like shapes; reversing the signs
+pushes toward 0.
+
+## Exercise 3
+
+Already fully worked in the handout. The key result: with
+`x1_no_symmetry` (symmetry's value set to 0),
+`perceptron(c(2,-2,0), 0, x1_no_symmetry)` and
+`perceptron(c(2,-2,5), 0, x1_no_symmetry)` give the **same** output --
+changing the symmetry weight from 0 to 5 makes no difference once its
+input is 0. Door 1 is shut for that weight this trial, regardless of the
+weight's own size.
+
+## Exercise 4
+
+```{r}
+x1_two_features <- c(data$roundness[1], data$elongation[1])
+perceptron(weights = c(2, -2), bias = 0, x = x1_two_features)
+```
+
+`sum(weights * x)` works unchanged because it's computing a dot product,
+and a dot product is defined for any pair of equal-length vectors --
+there's nothing in the definition of `sum(weights * x)` that hardcodes a
+particular length the way writing out `w1*x1 + w2*x2 + w3*x3` by hand
+would. Writing the weighted sum with `sum(weights * x)` instead of named
+terms is exactly what buys you "works for 2 inputs or 50 inputs, no code
+changes" -- the same point Practical 2 made about matrix/vector
+operations in general: the operation itself doesn't know or care how
+many elements are inside the vectors, only that both vectors match in
+length.
+
+## Exercise 5
+
+```{r}
+feature_names <- c("roundness", "elongation", "symmetry")
+rmsd(c(1, 1, 1), 0, data, feature_names)
+rmsd(c(6, -6, 6), 0, data, feature_names)
+rmsd(c(8, -8, 8), 0, data, feature_names)
+```
+
+`c(6, -6, 6)` gives RMSD around 0.50, versus about 0.57 for `c(1, 1, 1)`
+-- confirming the handout's claim. Worth trying `c(8, -8, 8)` too,
+though: it actually comes out slightly *worse* (around 0.52), not
+better. Scaling all three weights up doesn't help indefinitely -- past
+some point, the predictions just saturate harder in whichever direction
+they were already leaning, which doesn't fix the points that were on the
+wrong side to begin with. The weight combinations that do best all share
+the same sign pattern: positive on roundness and symmetry, negative on
+elongation -- matching exactly how Category A was constructed (high
+roundness/symmetry, low elongation).
+
+The core message is: **a weight's sign should match the direction of the
+relationship between its feature and the category**, and the exercise
+wants you to *discover* that by trial and error, rather than being told
+it upfront.
+
+Walk through why `6, -6, 6` beats `1, 1, 1`: the data was built so
+Category A shapes have **high** roundness, **high** symmetry, and
+**low** elongation. `6, -6, 6` has a positive weight on roundness, a
+negative weight on elongation, and a positive weight on symmetry, so a
+shape with high roundness and symmetry but low elongation pushes the
+weighted sum strongly positive (toward predicting category A), exactly
+matching how the categories were actually constructed. `1, 1, 1` gets
+the elongation sign backwards, it treats *higher* elongation as evidence
+*for* category A, when in the real data it's evidence against it. That
+mismatch on just one weight is enough to visibly hurt the fit.
+
+## Exercise 6
+
+Already fully worked in the handout. `w_new_a` and `w_new_b` differ only
+in the **third** entry (the symmetry weight) -- it moves in `w_new_a`
+(where symmetry's real value feeds in) and stays frozen in `w_new_b`
+(where symmetry was zeroed out for that trial). The first two entries
+(roundness, elongation weights) are identical in both, since neither
+trial changed those inputs. Zeroing out a *different* feature (e.g.
+roundness instead of symmetry) freezes a different weight -- whichever
+one matches the zeroed-out input, confirming this isn't about symmetry
+specifically, it's about door 1 being shut for whichever weight's own
+input was zero.
+
+## Exercise 7
+
+Already fully worked in the handout. `delta_unsure` (starting weights
+all zero, `predicted = 0.5`) comes out close to 5 times larger than
+`delta_confident` (starting weights `c(2,-2,0)`, `predicted` around
+0.83) -- same door-2 pattern as the lecture, now with three inputs
+feeding the same sigmoid. A third, in-between starting-weight choice
+should give a `delta` somewhere between the two extremes -- roughly
+speaking, the closer `predicted` lands to 0.5, the closer `delta` will
+be to the unsure end; the closer to 0 or 1, the closer to the confident
+end.
+
+## Exercise 8
+
+```{r}
+feature_names <- c("roundness", "elongation", "symmetry")
+weights <- c(0.1, 0.1, 0.1); bias <- 0.1; lr <- 0.5; n_epochs <- 200
+loss_history <- numeric(n_epochs)
+for (epoch in 1:n_epochs) {
+  for (i in 1:nrow(data)) {
+    xi <- as.numeric(data[i, feature_names])
+    target <- data$category[i]
+    pred <- perceptron(weights, bias, xi)
+    delta <- (target - pred) * pred * (1 - pred)
+    weights <- weights + lr * delta * xi
+    bias <- bias + lr * delta
+  }
+  loss_history[epoch] <- rmsd(weights, bias, data, feature_names)
+}
+loss_history[n_epochs]   # about 0.357
+
+feature_names2 <- c("roundness", "elongation")
+weights2 <- c(0.1, 0.1); bias2 <- 0.1
+loss_history2 <- numeric(n_epochs)
+for (epoch in 1:n_epochs) {
+  for (i in 1:nrow(data)) {
+    xi <- as.numeric(data[i, feature_names2])
+    target <- data$category[i]
+    pred <- perceptron(weights2, bias2, xi)
+    delta <- (target - pred) * pred * (1 - pred)
+    weights2 <- weights2 + lr * delta * xi
+    bias2 <- bias2 + lr * delta
+  }
+  loss_history2[epoch] <- rmsd(weights2, bias2, data, feature_names2)
+}
+loss_history2[n_epochs]   # about 0.361
+```
+
+The two-feature and three-feature final RMSDs come out almost identical
+(about 0.361 vs 0.357) -- adding symmetry makes only a marginal
+difference here. That matches your Exercise 1 observation: symmetry
+separates the categories in almost the same way elongation already does,
+so it isn't contributing much genuinely new information for the network
+to use. Neither version gets especially close to 0, which is expected --
+this dataset has some inherent noise built into it (not every point sits
+exactly where its category "should" place it), and no perceptron,
+however well trained, can perfectly fit noise that isn't really there to
+be fit.
+
+## Exercise 8b (optional)
+
+```{r}
+# (run right after the three-feature Exercise 8 training)
+feature_names <- c("roundness", "elongation", "symmetry")
+X <- as.matrix(data[, feature_names])
+predicted_prob <- apply(X, 1, function(x) perceptron(weights, bias, x))
+predicted_category <- ifelse(predicted_prob >= 0.5, 1, 0)
+
+data.frame(prob = round(predicted_prob, 2),
+           predicted = predicted_category,
+           actual = data$category)
+```
+
+The trained network classifies 14 of the 16 shapes "correctly" and gets
+exactly two "wrong": **row 8** and **row 16**. But look those two up in
+the data and find them in your Exercise 1 scatter plots: row 8 is
+labeled Category A yet sits squarely among the Category B points (low
+roundness, high elongation, low symmetry), and row 16 is the mirror
+image. These are the dataset's two noisy points as their labels don't
+match where they actually sit. The network isn't confused about them at
+all: it's *confidently* on the "wrong" side for both (probability around
+0.07 for row 8 and 0.78 for row 16), because it learned the overall
+pattern and those two labels contradict the pattern.
+
+This is also exactly why the Exercise 8 RMSD levels off well above 0
+rather than approaching it: those two shapes contribute a large,
+permanent error that no amount of training can remove as a single
+straight-line boundary can't chase two points sitting deep in the other
+category's territory without misclassifying several well-behaved points
+instead. That inability turns out to be a feature, not a bug: refusing
+to contort itself around noisy labels is what keeps the model's boundary
+sensible.
+
+## Exercise 9
+
+```{r}
+run_training <- function(lr_value, n_epochs = 200) {
+  weights <- c(0.1, 0.1, 0.1); bias <- 0.1
+  loss_history <- numeric(n_epochs)
+  for (epoch in 1:n_epochs) {
+    for (i in 1:nrow(data)) {
+      xi <- as.numeric(data[i, feature_names])
+      target <- data$category[i]
+      pred <- perceptron(weights, bias, xi)
+      delta <- (target - pred) * pred * (1 - pred)
+      weights <- weights + lr_value * delta * xi
+      bias <- bias + lr_value * delta
+    }
+    loss_history[epoch] <- rmsd(weights, bias, data, feature_names)
+  }
+  loss_history
+}
+
+plot(run_training(0.01), type = "l", main = "lr = 0.01", ylim = c(0.3, 0.8))
+plot(run_training(0.5),  type = "l", main = "lr = 0.5",  ylim = c(0.3, 0.8))
+plot(run_training(5),    type = "l", main = "lr = 5",    ylim = c(0.3, 0.8))
+plot(run_training(50),   type = "l", main = "lr = 50",   ylim = c(0.3, 0.8))
+```
+
+`lr = 0.01` descends very slowly and clearly hasn't finished descending
+by epoch 200; it's still on its way down when the plot ends. `lr = 50`
+descends smoothly and settles into a low, stable RMSD well before 200
+epochs. `lr = 5` and `lr = 50` both reach a similar final RMSD to
+`lr = 0.5` , but the path there is visibly rougher; the loss curve jumps
+around noticeably before settling, especially at `lr = 50` , rather than
+descending smoothly.
+
+What `eta` is actually controlling: the size of the jump the weights
+make across the error landscape after each trial, the same landscape you
+visualized as a cost surface in the earlier lectures. A larger `eta`
+means bigger jumps across that surface per step.
+
+That can cut both ways. A bigger jump **can** be an advantage on a
+bumpier landscape than this one; if the surface has more than one
+valley, a small step size can get trapped in whichever valley it happens
+to land near first, while a larger step is more likely to jump clean
+over a shallow ridge and land somewhere better. (For this particular
+dataset, all four learning rates end up in roughly the same place, so
+this benefit isn't something you can actually see here, but it's worth
+knowing as a real, general possibility on other, bumpier landscapes.)
+
+The downside is more visible in what you just plotted. A jump that's too
+large can overshoot the bottom of the valley entirely, landing further
+up the **other** side rather than settling in, which is exactly the
+bouncing you can see in the `lr = 50` curve, each step correcting too
+hard and overcorrecting again. In the worst case, an oversized jump
+early in training can push a unit's weights so far that its prediction
+saturates all the way to the wrong extreme (predicted very close to 0 or
+1 when it should be the opposite). Once that happens, training can get
+stuck rather than just noisy: recall from the lecture that
+`predicted * (1 - predicted)` vanishes as predicted approaches 0 or 1,
+so a badly saturated, wrong prediction gives almost no correction signal
+to fix itself with. A learning rate large enough to cause that isn't
+just inefficient, it can genuinely break training, which is the real
+reason "too large" is a danger worth taking seriously, not just a matter
+of a slightly bumpier-looking loss curve.
+
+## Exercise 10
+
+```{r}
+feature_names <- c("roundness", "elongation")
+weights <- c(0.1, 0.1); bias <- 0.1
+checkpoints <- c(1, 5, 20, 50, 200)
+saved <- list()
+for (epoch in 1:200) {
+  for (i in 1:nrow(data)) {
+    xi <- as.numeric(data[i, feature_names])
+    target <- data$category[i]
+    pred <- perceptron(weights, bias, xi)
+    delta <- (target - pred) * pred * (1 - pred)
+    weights <- weights + 0.5 * delta * xi
+    bias <- bias + 0.5 * delta
+  }
+  if (epoch %in% checkpoints) saved[[as.character(epoch)]] <- c(weights, bias)
+}
+
+plot(data$roundness, data$elongation, pch = 19,
+     col = ifelse(data$category == 1, "steelblue", "darkorange"),
+     xlab = "Roundness", ylab = "Elongation")
+x_seq <- seq(0, 1, length.out = 100)
+cols <- c("gray85", "gray65", "gray45", "gray25", "black")
+for (k in seq_along(checkpoints)) {
+  w <- saved[[as.character(checkpoints[k])]]
+  lines(x_seq, -(w[1] * x_seq + w[3]) / w[2], col = cols[k], lwd = 2)
+}
+legend("bottomleft", legend = paste("epoch", checkpoints), col = cols, lwd = 2)
+```
+
+The epoch-50 line sits much closer to the epoch-200 line than to the
+epoch-20 line -- most of the boundary's total movement has already
+happened by epoch 50, and training after that mostly fine-tunes rather
+than making large jumps. This matches a pattern that shows up constantly
+in gradient-based training generally: early updates, when the model is
+furthest from a good fit, tend to be the largest; later updates get
+progressively smaller as the model settles in, even with a constant
+learning rate -- because `delta` itself shrinks as `predicted` gets
+closer to `target` for most points.
+
+## Exercise 11
+
+```{r}
+weights <- c(0.1, 0.1); bias <- 0.1
+n_epochs <- 2000; lr <- 5
+x1 <- c(0, 0, 1, 1); x2 <- c(0, 1, 0, 1); category_xor <- c(0, 1, 1, 0)
+xor_data <- data.frame(x1, x2, category = category_xor)
+
+for (epoch in 1:n_epochs) {
+  for (i in 1:nrow(xor_data)) {
+    xi <- c(xor_data$x1[i], xor_data$x2[i])
+    target <- xor_data$category[i]
+    pred <- perceptron(weights, bias, xi)
+    delta <- (target - pred) * pred * (1 - pred)
+    weights <- weights + lr * delta * xi
+    bias <- bias + lr * delta
+  }
+}
+# same rmsd() reuse as the handout's training loop -- xor_data has a category
+# column, so the function works unchanged
+rmsd(weights, bias, xor_data, c("x1", "x2"))
+```
+
+No -- however you set the learning rate (tried here: much larger,
+`lr = 5`) or however many epochs you allow (tried here: 2000, ten times
+the original), the final RMSD stays close to 0.5, essentially unchanged
+from a short run at the default settings. This is the clearest possible
+confirmation that XOR isn't a "hasn't trained long enough yet" problem
+-- more training time and different learning rates don't touch it,
+because the limitation is structural, not a matter of search effort.
+
+## Exercise 12 (discussion)
+
+There's no line through the four XOR points that separates the two blue
+points from the two orange points -- every candidate line either has a
+blue point on the wrong side, an orange point on the wrong side, or
+both. This is the direct, visual reason the loss never approaches zero:
+the delta rule is very good at finding the best possible straight-line
+boundary, but for XOR, even the best straight line still gets some
+points wrong, no matter how it's rotated or shifted. As the lecture's "A
+puzzle" slide previewed, actually solving this needs more than a
+straight line. Specifically, the second-layer, multi-unit approach
+covered in next week's lecture, where multiple simple boundaries get
+combined into something that can carve out the diagonal pattern XOR
+requires.
