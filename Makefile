@@ -6,7 +6,7 @@ manual:
 	## manual website
 	quarto render manual --to html
 	## R basics tutorial
-	quarto render r_basics/
+	cd r_basics && make
 	## joining manual, r_basics and practical rmd-files
 	mkdir -p _build
 	cp -r manual/_site/* _build/
@@ -23,3 +23,4 @@ clean:
 	rm -Rf _build
 	rm -Rf r_basics/_book r_basics/_freeze r_basics/.quarto
 	rm -Rf manual/_site manual/_freeze manual/.quarto
+
