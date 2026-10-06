@@ -54,7 +54,7 @@ practical_title = c(
   "Resampling & Monte Carlo Methods",
   "Neural Networks 1",
   "Neural Networks 2",
-  "Reaction Time Models")
+  "Multinomial Processing Tree Models")
 
 lecture_title= c(
   "Introduction to Data Science",
@@ -62,7 +62,7 @@ lecture_title= c(
   "Resampling & Monte Carlo Methods",
   "Neural Networks 1",
   "Neural Networks 2",
-  "Reaction Time Models",
+  "Multinomial Processing Tree Models",
   "Q & A Lecture")
 
 
