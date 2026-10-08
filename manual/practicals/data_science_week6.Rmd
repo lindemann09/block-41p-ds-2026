@@ -1,7 +1,420 @@
 ---
-title: "Week X: Title"
-subtitle: "Subtitle"
+title: "Practical 5: Neural Networks 2"
+subtitle: "How Many Hidden Units Do You Actually Need?"
+output:
+  html_document:
+    toc: true
 ---
 
-## Motivation
-....
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+## Before you start
+
+In the lecture we built a 2-input, 2-hidden-unit network by hand,
+trained it with backpropagation, and watched it solve XOR. The
+`forward()` function you saw there already used matrix notation
+(`W1 %*% x`), which means it was general the whole time, i.e., it never
+actually assumed exactly 2 inputs or exactly 2 hidden units, those
+numbers just came from the *shape* of `W1`.
+
+Most of the code below is already written for you, including a fully
+general training function. Your job in most exercises is to **run it,
+then change something** (how many hidden units, which dataset, how many
+restarts) and observe what happens. This practical is about building
+intuition for *when* and *why* a network needs more hidden units.
+
+You don't need to understand every line of R syntax perfectly, rather
+focus on understanding *what each step is doing conceptually*. If
+something errors, re-check you've run all the chunks above it in order.
+
+## Part 0: A harder problem — 3-bit parity
+
+XOR is "is exactly one of these two bits on?" The natural 3-input
+generalization is **parity**: is the *number* of 1s among the three
+inputs odd?
+
+```{r}
+# Every combination of 3 binary inputs (2^3 = 8 rows), same idea as the lecture's xor_data
+# but with one more input column.
+parity_data <- expand.grid(x1 = c(0, 1), x2 = c(0, 1), x3 = c(0, 1))
+parity_data$category <- (parity_data$x1 + parity_data$x2 + parity_data$x3) %% 2  # 1 if the sum is odd
+parity_data
+```
+
+### Exercise 1
+
+Confirm by eye that `category` is 1 exactly when an odd number of `x1`,
+`x2`, `x3` are 1 (1 or 3 of them), and 0 otherwise. This is a genuine
+three-input generalization of last lecture's XOR.
+
+## Part 1: A fully general training function
+
+`sigmoid()` and `forward()` are unchanged from the lecture .
+
+```{r}
+sigmoid <- function(x) {
+  1 / (1 + exp(-x))
+}
+
+forward <- function(x, W1, b1, w2, b2) {
+  h <- sigmoid(W1 %*% x + b1)
+  output <- sigmoid(sum(w2 * h) + b2)
+  list(h = as.vector(h), output = output)
+}
+```
+
+### Exercise 2
+
+Sanity-check `forward()` with a single hidden unit to see if it still
+works with one hidden unit instead of two:
+
+```{r}
+forward(x = c(1, 1), W1 = matrix(c(1, 1), nrow = 1), b1 = 0, w2 = 1, b2 = 0)
+```
+
+You should get `h` around 0.881 and `output` around 0.707. Now try
+changing `w2` from `1` to `-1` and re-run. Does `output` go up or down,
+and does that match what you'd expect from a negative output weight?
+
+Here's a fully general training function, which generalizes the
+lecture's `train_xor()`. It takes the input matrix `X` (it works out the
+number of inputs itself, as `ncol(X)`) and `n_hidden` as arguments,
+instead of assuming there are always 2 inputs and 2 hidden units:
+
+```{r}
+train_network <- function(X, y, n_hidden, seed, lr = 0.5, n_epochs = 2000) {
+  set.seed(seed)
+  X <- as.matrix(X)
+  n_inputs <- ncol(X)
+
+  # random starting weights, sized from n_hidden and n_inputs -- not hardcoded
+  W1 <- matrix(rnorm(n_hidden * n_inputs, sd = 1), nrow = n_hidden)
+  b1 <- rep(0, n_hidden)
+  w2 <- rnorm(n_hidden, sd = 1)
+  b2 <- 0
+
+  loss_history <- numeric(n_epochs)
+  for (epoch in 1:n_epochs) {
+    for (i in 1:nrow(X)) {
+      x <- X[i, ]; target <- y[i]
+      fwd <- forward(x, W1, b1, w2, b2)
+      h <- fwd$h; output <- fwd$output
+
+      delta_out <- (target - output) * output * (1 - output)      # same delta rule as the lecture
+      delta_hidden <- delta_out * w2 * h * (1 - h)                 # same backward-blame formula
+
+      # outer(delta_hidden, x) updates every entry of W1 in one line -- it's the
+      # same by-hand update from the lecture's worked example, just generalized to
+      # however many hidden units there are, instead of writing out 4 fixed lines:
+      #   for each hidden unit i, for each input j:
+      #     W1[i, j] <- W1[i, j] + lr * delta_hidden[i] * x[j]
+      W1 <- W1 + lr * outer(delta_hidden, x)
+      b1 <- b1 + lr * delta_hidden
+      w2 <- w2 + lr * delta_out * h
+      b2 <- b2 + lr * delta_out
+    }
+    predictions <- numeric(nrow(X))                      # one prediction per row of the data
+    for (i in 1:nrow(X)) {
+      predictions[i] <- forward(X[i, ], W1, b1, w2, b2)$output
+    }
+    loss_history[epoch] <- sqrt(mean((y - predictions)^2))
+  }
+  list(W1 = W1, b1 = b1, w2 = w2, b2 = b2, loss_history = loss_history)
+}
+```
+
+### Exercise 3
+
+Try `train_network()` with only **one** hidden unit on the lecture's XOR
+data:
+
+```{r}
+x1 <- c(0, 0, 1, 1); x2 <- c(0, 1, 0, 1); category <- c(0, 1, 1, 0)
+xor_data <- data.frame(x1, x2, category)
+
+fit_1hidden <- train_network(X = xor_data[, c("x1","x2")], y = xor_data$category,
+                              n_hidden = 1, seed = 1)
+fit_1hidden$loss_history[2000]
+```
+
+Does a single hidden unit manage to solve XOR? Should it, given what you
+already know from last lecture about what one unit, whether it is hidden
+or not, can and can't do? Keep this result in mind for Part 4.
+
+## Part 2: Sanity-check on familiar ground
+
+Before trusting `train_network()` on a new problem, check it still gets
+the *old* problem right. As in the lecture, we train several networks from
+different random starting points (restarts) and then pick one that
+worked.
+
+### Exercise 4
+
+```{r}
+xor_runs <- list()
+xor_final_losses <- numeric(10)
+for (seed in 1:10) {
+  xor_runs[[seed]] <- train_network(xor_data[, c("x1","x2")], xor_data$category, n_hidden = 2, seed = seed)
+  xor_final_losses[seed] <- xor_runs[[seed]]$loss_history[2000]
+}
+round(xor_final_losses, 4)
+
+chosen_xor <- xor_runs[[9]]          # the run from seed 9
+chosen_xor$loss_history[2000]
+```
+
+Several runs end well under 0.1, like in the lecture, and some are
+stuck at a much higher RMSD. We'll look at the run from **seed 9**
+(RMSD about 0.05, nearly as good as the best one), because its two
+lines slope downward like the lecture's OR and NAND lines. (Exercise 4b
+shows that other successful runs find a different, equally good
+solution.) Now plot each hidden unit's own decision boundary, which is the
+same formula as the lecture's "It works!" slide, row $i$ of `W1` gives
+$x_2 = -(w_{i1}x_1 + b_i)/w_{i2}$:
+
+```{r}
+plot(xor_data$x1, xor_data$x2, pch = 19, cex = 3,
+     col = ifelse(xor_data$category == 1, "steelblue", "darkorange"),
+     xlab = "x1", ylab = "x2", xlim = c(-0.5, 1.5), ylim = c(-0.5, 1.5))
+x_seq <- seq(-0.5, 1.5, length.out = 100)
+for (i in 1:2) {
+  y_line <- -(chosen_xor$W1[i, 1] * x_seq + chosen_xor$b1[i]) / chosen_xor$W1[i, 2]
+  lines(x_seq, y_line, col = i + 1, lwd = 2)
+}
+legend("topright", legend = c("hidden unit 1", "hidden unit 2"), col = c(2, 3), lwd = 2)
+```
+
+You should see two lines that, combined, separate the XOR categories.
+The same "two lines" picture from the lecture, just found automatically
+this time instead of hand-picked.
+
+Now look at how the error changed *during* training. `train_network()`
+stores the RMSD after every epoch in `loss_history`, so we can plot the
+learning curve of all 10 runs on one plot:
+
+```{r}
+plot(xor_runs[[1]]$loss_history, type = "l", lwd = 2, col = 1, ylim = c(0, 0.6),
+     xlab = "epoch", ylab = "RMSD")
+for (seed in 2:10) {
+  lines(xor_runs[[seed]]$loss_history, lwd = 2, col = seed)
+}
+```
+
+Describe what you see. Do all runs start at about the same error? Do
+they all come down at the same speed? Do some sit on a flat stretch
+(a plateau) for a long time before dropping? Are there runs that never
+come down within 2000 epochs, and what does that tell you about what
+"stuck" means?
+
+### Exercise 4b: does every run find the same two lines?
+
+The plot above shows the lines from just *one* run (seed 9). But
+you trained 10 networks, each from a different random start. Plot the
+two lines each run found, side by side:
+
+```{r, fig.width = 12, fig.height = 5}
+par(mfrow = c(2, 5))
+for (r in 1:10) {
+  fit <- xor_runs[[r]]
+  plot(xor_data$x1, xor_data$x2, pch = 19, cex = 2,
+       col = ifelse(xor_data$category == 1, "steelblue", "darkorange"),
+       xlab = "x1", ylab = "x2", xlim = c(-0.5, 1.5), ylim = c(-0.5, 1.5),
+       main = paste("seed", r, "- RMSD", round(xor_final_losses[r], 3)))
+  for (i in 1:2) {
+    y_line <- -(fit$W1[i, 1] * x_seq + fit$b1[i]) / fit$W1[i, 2]
+    lines(x_seq, y_line, col = i + 1, lwd = 2)
+  }
+}
+par(mfrow = c(1, 1))
+```
+
+And print each hidden unit's **slope** (from the line's equation above,
+the slope is $-w_{i1}/w_{i2}$):
+
+```{r}
+for (r in 1:10) {
+  fit <- xor_runs[[r]]
+  slopes <- numeric(2)
+  for (i in 1:2) {
+    slopes[i] <- -fit$W1[i, 1] / fit$W1[i, 2]
+  }
+  cat("seed", r, " RMSD", round(xor_final_losses[r], 3), " slopes:", round(slopes, 2), "\n")
+}
+```
+
+Ignore any run that got stuck (RMSD well above 0.1) as its lines don't
+solve XOR. Among the runs that *did* solve it: do all of them find the
+same two lines? Is each line sloping upward (positive slope) or downward
+(negative slope)? Within a single run, do the two lines slope the same
+way or opposite ways?
+
+Then think about *why* both options can work. Sketch (or picture) the
+four XOR points: which pairs of parallel lines could each trap the two
+blue points between them, or push them to opposite outsides? What does
+this say about whether a trained network's solution is *unique*?
+
+**Optional:** train 50 networks instead of 10 and count how many
+successful runs have an upward-sloping first line versus a
+downward-sloping one:
+
+```{r, eval = FALSE}
+n_up <- 0; n_down <- 0
+for (seed in 1:50) {
+  fit <- train_network(xor_data[, c("x1","x2")], xor_data$category, n_hidden = 2, seed = seed)
+  if (fit$loss_history[2000] < 0.1) {          # only count runs that actually solved XOR
+    slope1 <- -fit$W1[1, 1] / fit$W1[1, 2]
+    if (slope1 > 0) n_up <- n_up + 1 else n_down <- n_down + 1
+  }
+}
+c(up = n_up, down = n_down)
+```
+
+### Exercise 4c: what does the hidden layer do to the inputs?
+
+The output unit is just one more perceptron, so on its own it can only
+draw *one* straight line, and one line cannot solve XOR. So how does the
+network solve it? The trick is that the output unit doesn't look at
+`(x1, x2)`. It looks at the hidden units' outputs `(h1, h2)`. Let's
+compute `(h1, h2)` for each of the four XOR inputs, using the network
+from Exercise 4 (seed 9):
+
+```{r}
+H <- matrix(0, nrow = 4, ncol = 2)       # one row per input pattern, one column per hidden unit
+for (i in 1:4) {
+  x_i <- c(xor_data$x1[i], xor_data$x2[i])
+  H[i, ] <- forward(x_i, chosen_xor$W1, chosen_xor$b1, chosen_xor$w2, chosen_xor$b2)$h
+}
+data.frame(xor_data, h1 = round(H[, 1], 2), h2 = round(H[, 2], 2))
+```
+
+Now plot the four points in **hidden space** (`h1` on the x-axis, `h2` on
+the y-axis) instead of in input space, together with the output unit's
+own decision line. The output unit says "category 1" when
+$v_1 h_1 + v_2 h_2 + c > 0$, so the line is where this sum equals 0, i.e.
+$h_2 = -(v_1 h_1 + c)/v_2$:
+
+```{r}
+plot(H[, 1], H[, 2], pch = 19, cex = 3,
+     col = ifelse(xor_data$category == 1, "steelblue", "darkorange"),
+     xlab = "h1", ylab = "h2", xlim = c(-0.2, 1.2), ylim = c(-0.2, 1.2))
+h1_seq <- seq(-0.2, 1.2, length.out = 100)
+lines(h1_seq, -(chosen_xor$w2[1] * h1_seq + chosen_xor$b2) / chosen_xor$w2[2], lwd = 2)
+```
+
+Questions:
+
+1. In the original input space, could *one* straight line separate the
+   blue points from the orange ones? And in hidden space?
+2. Look at the table of `h1` and `h2`. Which input patterns have ended
+   up at (almost) the same spot in hidden space? Are they from the same
+   category or different categories?
+3. In your own words: what did the hidden layer do to the problem, so
+   that the output unit could solve it with a single line?
+4. Use this to explain Exercise 3: why can't a network with only *one*
+   hidden unit solve XOR?
+5. **Optional:** compare the two hidden units with the lecture's OR and
+   NAND units. Which logic gate does each one resemble? (Check each
+   column of the table: for which inputs is it close to 1?)
+
+## Part 3: Does 2 hidden units scale up to 3-bit parity?
+
+### Exercise 5
+
+Run the exact same 10-restart pattern on `parity_data` instead of
+`xor_data`:
+
+```{r}
+parity_runs <- list()
+parity_final_losses <- numeric(10)
+for (seed in 1:10) {
+  parity_runs[[seed]] <- train_network(parity_data[, c("x1","x2","x3")], parity_data$category, n_hidden = 2, seed = seed)
+  parity_final_losses[seed] <- parity_runs[[seed]]$loss_history[2000]
+}
+best_parity <- parity_runs[[which.min(parity_final_losses)]]
+round(parity_final_losses, 4)
+best_parity$loss_history[2000]
+```
+
+How does the best final RMSD compare to Exercise 4's XOR result? Is it
+clearly worse, about the same, or better? And look at the whole vector
+of 10 final losses, not just the best one: how many of the 10 runs ended
+up with a low RMSD?
+
+### Exercise 6
+
+Keeping only the best of several restarts hides how often an
+*individual* run gets stuck. Here is a more direct question: if you
+train a network **once**, from one random starting point, how often does
+it solve parity (final RMSD below 0.15)? The function below trains
+`n_runs` separate networks (seeds 1 to `n_runs`) and reports the
+fraction that succeeded:
+
+```{r}
+single_run_success <- function(n_hidden, n_runs = 20) {
+  successes <- logical(n_runs)           # one TRUE/FALSE per run
+  for (s in 1:n_runs) {
+    fit <- train_network(parity_data[, c("x1","x2","x3")], parity_data$category,
+                         n_hidden = n_hidden, seed = s)
+    successes[s] <- fit$loss_history[2000] < 0.15   # TRUE if this run got below 0.15
+  }
+  mean(successes)                        # fraction of the runs that succeeded
+}
+
+single_run_success(n_hidden = 2)
+```
+
+What fraction of the 20 single runs succeed with `n_hidden = 2`? (This
+will take a little while to run, since 20 separate networks are being
+trained.) Compare with Exercise 5: how many of those 10 final RMSDs were
+low?
+
+## Part 4: How many hidden units are actually needed?
+
+### Exercise 7
+
+Change `n_hidden = 2` to `n_hidden = 4` in the line below and re-run
+(copy the `single_run_success()` function from Exercise 6 above if it's
+not still in your environment):
+
+```{r}
+single_run_success(n_hidden = 2, n_runs = 20)
+```
+
+How does the success rate change compared to Exercise 6? Try
+`n_hidden = 8` too, if you're curious how far the pattern continues.
+
+### Exercise 8 (discussion)
+
+Based on Exercises 3, 6, and 7: does 3-bit parity need *more* hidden
+units than 2-bit XOR to train reliably? Take a guess at why, in your own
+words. Think back to the lecture's "two lines, combined" picture for
+XOR. If XOR needs 2 lines (2 hidden units) to carve up its input space
+correctly, how many lines might you guess parity-3 needs, and does that
+match what you found?
+
+## Part 5 (optional): What did the hidden units learn?
+
+### Exercise 9 (optional)
+
+For a successful `n_hidden = 4` run on `parity_data` (you'll need to run
+`train_network()` directly, since `single_run_success()` only returned a
+fraction, not the weights themselves), look at the trained `W1` matrix.
+First check the run really did solve parity (final RMSD below 0.15),
+then look at the weights:
+
+```{r}
+fit_4hidden <- train_network(parity_data[, c("x1","x2","x3")], parity_data$category, n_hidden = 4, seed = 1)
+fit_4hidden$loss_history[2000]   # should be below 0.15; if not, try another seed
+round(fit_4hidden$W1, 2)
+round(fit_4hidden$b1, 2)
+```
+
+Each row of `W1` plus its matching entry in `b1` defines one hidden
+unit's own little linear rule over `(x1, x2, x3)`. Pick one hidden unit
+(one row) and, using the same idea as the lecture's hand-picked OR/NAND
+example, see if you can describe in words what pattern of inputs makes
+that hidden unit's output close to 1 versus close to 0. Try plugging a
+few different `(x1,x2,x3)` combinations into that row's weights by hand
+if it helps.

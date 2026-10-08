@@ -1,0 +1,344 @@
+---
+title: "Practical 5: Neural Networks 2 -- Solutions"
+output:
+  html_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+> Posted a few days after the session. Try the exercises yourself first
+> -- the value is in getting stuck, not in reading the answer.
+
+## Setup (from the handout)
+
+```{r}
+sigmoid <- function(x) {
+  1 / (1 + exp(-x))
+}
+forward <- function(x, W1, b1, w2, b2) {
+  h <- sigmoid(W1 %*% x + b1)
+  output <- sigmoid(sum(w2 * h) + b2)
+  list(h = as.vector(h), output = output)
+}
+train_network <- function(X, y, n_hidden, seed, lr = 0.5, n_epochs = 2000) {
+  set.seed(seed)
+  X <- as.matrix(X)
+  n_inputs <- ncol(X)
+  W1 <- matrix(rnorm(n_hidden * n_inputs, sd = 1), nrow = n_hidden)
+  b1 <- rep(0, n_hidden)
+  w2 <- rnorm(n_hidden, sd = 1)
+  b2 <- 0
+  loss_history <- numeric(n_epochs)
+  for (epoch in 1:n_epochs) {
+    for (i in 1:nrow(X)) {
+      x <- X[i, ]; target <- y[i]
+      fwd <- forward(x, W1, b1, w2, b2)
+      h <- fwd$h; output <- fwd$output
+      delta_out <- (target - output) * output * (1 - output)
+      delta_hidden <- delta_out * w2 * h * (1 - h)
+      W1 <- W1 + lr * outer(delta_hidden, x)
+      b1 <- b1 + lr * delta_hidden
+      w2 <- w2 + lr * delta_out * h
+      b2 <- b2 + lr * delta_out
+    }
+    predictions <- numeric(nrow(X))                      # one prediction per row of the data
+    for (i in 1:nrow(X)) {
+      predictions[i] <- forward(X[i, ], W1, b1, w2, b2)$output
+    }
+    loss_history[epoch] <- sqrt(mean((y - predictions)^2))
+  }
+  list(W1 = W1, b1 = b1, w2 = w2, b2 = b2, loss_history = loss_history)
+}
+
+parity_data <- expand.grid(x1 = c(0, 1), x2 = c(0, 1), x3 = c(0, 1))
+parity_data$category <- (parity_data$x1 + parity_data$x2 + parity_data$x3) %% 2
+```
+
+## Exercise 1
+
+Each row of `parity_data` should show `category = 1` exactly when one or
+three of `x1`, `x2`, `x3` are 1 -- e.g. `(1,0,0)` has one 1, category 1;
+`(1,1,0)` has two 1s, category 0; `(1,1,1)` has three 1s, category 1.
+For the two-input case (imagining `x3` fixed at 0), this collapses to
+exactly XOR.
+
+## Exercise 2
+
+```{r}
+forward(x = c(1, 1), W1 = matrix(c(1, 1), nrow = 1), b1 = 0, w2 = 1, b2 = 0)
+```
+
+`h` comes out around 0.881, `output` around 0.707, matching the handout.
+Flipping `w2` from `1` to `-1` flips `output` to about 0.293 -- the same
+`h` (since `w2` doesn't affect the hidden layer), but now negatively
+weighted into the output, so a confident hidden-unit signal gets turned
+into a confidently *low* output instead of a confidently high one.
+
+## Exercise 3
+
+```{r}
+x1 <- c(0, 0, 1, 1); x2 <- c(0, 1, 0, 1); category <- c(0, 1, 1, 0)
+xor_data <- data.frame(x1, x2, category)
+
+fit_1hidden <- train_network(X = xor_data[, c("x1","x2")], y = xor_data$category, n_hidden = 1, seed = 1)
+fit_1hidden$loss_history[2000]
+```
+
+You should get an RMSD stuck around **0.41** -- nowhere near zero. This
+matches expectations exactly: a single hidden unit, however it's
+trained, is still just one perceptron computing one straight-line
+boundary -- it inherits exactly the same XOR limitation from two
+lectures ago. Adding a hidden *layer* only helps once there's more than
+one unit in it.
+
+## Exercise 4
+
+```{r}
+xor_runs <- list()
+xor_final_losses <- numeric(10)
+for (seed in 1:10) {
+  xor_runs[[seed]] <- train_network(xor_data[, c("x1","x2")], xor_data$category, n_hidden = 2, seed = seed)
+  xor_final_losses[seed] <- xor_runs[[seed]]$loss_history[2000]
+}
+round(xor_final_losses, 4)
+
+chosen_xor <- xor_runs[[9]]          # the run from seed 9
+chosen_xor$loss_history[2000]
+```
+
+The ten seeds give quite different results (some finish at a high RMSD,
+clearly stuck; others reach well under 0.1) -- exactly the "some random
+starts get stuck" behavior the lecture warned about, which is why
+best-of-several restarts matter. The chosen run (seed 9) should land well under
+0.1 (about 0.05), confirming `train_network()` reproduces the lecture's
+result. We use seed 9 rather than the overall lowest RMSD because its
+two lines slope downward, like the lecture's OR and NAND lines. The
+boundary-line plot should show two distinct lines that, together, box
+the two blue points away from the two orange ones -- the same "two
+lines" picture as the lecture, just discovered automatically.
+
+## Exercise 4b
+
+The runs that solve XOR do **not** all find the same two lines. They
+fall into two families:
+
+- **Both lines slope downward (negative slope)**, roughly parallel to
+  the anti-diagonal -- like the lecture's hand-picked OR and NAND lines
+  ($x_1 + x_2 = 0.5$ and $x_1 + x_2 = 1.5$). The two blue points sit in
+  the *band between* the lines, and the two orange points sit outside
+  it, one on each side.
+- **Both lines slope upward (positive slope)**, roughly parallel to the
+  main diagonal -- lines like $x_2 = x_1 + 0.5$ and $x_2 = x_1 - 0.5$.
+  Now each blue point is cut off on its own side, and the two orange
+  points sit together in the band between the lines. The output unit
+  fires when *either* hidden unit does.
+
+Within a single successful run, the two lines almost always slope the
+*same* way (both up or both down), and across many runs both families
+turn up about equally often -- with 10 seeds you should almost always
+see both, though the exact split varies. Which family a run lands in
+depends entirely on its random starting weights. Runs that got stuck
+(RMSD well above 0.1) show lines that don't separate the categories at
+all, so ignore those. Swapping which hidden unit is "unit 1" and which
+is "unit 2" also gives an equivalent solution, so even two runs in the
+same family can have their lines in a different order.
+
+So the answer to "is the solution unique?" is **no**: XOR has more than
+one valid two-line solution, and gradient descent simply finds whichever
+one its starting point leads to. This is true of neural networks in
+general -- different training runs can end up with different weights
+that behave the same way, which is one reason trained weights are hard
+to interpret one by one.
+
+## Exercise 4 (learning curves)
+
+```{r}
+plot(xor_runs[[1]]$loss_history, type = "l", lwd = 2, col = 1, ylim = c(0, 0.6),
+     xlab = "epoch", ylab = "RMSD")
+for (seed in 2:10) {
+  lines(xor_runs[[seed]]$loss_history, lwd = 2, col = seed)
+}
+```
+
+All runs start at roughly the same error (an RMSD around 0.5, i.e. the
+network outputs about 0.5 for everything). After that they differ a lot.
+Runs that succeed typically sit on a **plateau** near that starting error
+for a while, then drop fairly suddenly to a low RMSD; how long the
+plateau lasts depends on the random start. Runs that are "stuck" stay
+at a high RMSD for all 2000 epochs: they have found a poor solution
+(or are stuck on a long plateau) and have not made it out in the time
+we gave them. This is what "stuck" means, and why restarting from a new
+random start helps. (The exact curves depend on your seeds.)
+
+## Exercise 4c
+
+```{r}
+H <- matrix(0, nrow = 4, ncol = 2)
+for (i in 1:4) {
+  x_i <- c(xor_data$x1[i], xor_data$x2[i])
+  H[i, ] <- forward(x_i, chosen_xor$W1, chosen_xor$b1, chosen_xor$w2, chosen_xor$b2)$h
+}
+data.frame(xor_data, h1 = round(H[, 1], 2), h2 = round(H[, 2], 2))
+
+plot(H[, 1], H[, 2], pch = 19, cex = 3,
+     col = ifelse(xor_data$category == 1, "steelblue", "darkorange"),
+     xlab = "h1", ylab = "h2", xlim = c(-0.2, 1.2), ylim = c(-0.2, 1.2))
+h1_seq <- seq(-0.2, 1.2, length.out = 100)
+lines(h1_seq, -(chosen_xor$w2[1] * h1_seq + chosen_xor$b2) / chosen_xor$w2[2], lwd = 2)
+```
+
+1. In input space, no single line separates the two categories (that is
+   the XOR problem). In hidden space, one line does: the output unit's
+   line separates the blue points from the orange ones.
+2. For the seed-9 run (two downward-sloping lines, as in the lecture) the
+   table should look roughly like this:
+
+   | x1 | x2 | category | h1 | h2 |
+   |----|----|----------|------|------|
+   | 0 | 0 | 0 | 1.00 | 0.90 |
+   | 0 | 1 | 1 | 0.87 | 0.03 |
+   | 1 | 0 | 1 | 0.87 | 0.03 |
+   | 1 | 1 | 0 | 0.11 | 0.00 |
+
+   The two **blue** patterns, `(0,1)` and `(1,0)`, land at the *same* spot,
+   about `(0.87, 0.03)`, while the two orange patterns land at two
+   different spots on either side. `h1` is NAND-like (high except for
+   `(1,1)`), as in the lecture. `h2` is high only for `(0,0)`: it is the
+   *mirror image* of the lecture's OR unit (NOT OR). It draws the same
+   kind of line but fires on the other side of it, and the output unit
+   compensates with a negative weight on `h2`. (A hidden unit can fire
+   on either side of its line; the output weight just gets the opposite
+   sign to cancel it.) So the exact corner differs from the lecture's
+   `(1, 1)`, but the picture is the same: blue together, orange apart.
+3. The hidden layer *re-represents* the inputs: it moves the four points
+   so that the two blue points are pulled together into one spot, and
+   the categories can then be told apart with a single straight line.
+   The output unit only has to solve an easy, linearly separable
+   problem; the hard part, making XOR linearly separable, was done by the
+   hidden layer.
+4. With only one hidden unit, hidden space is one-dimensional: every
+   input is just a single number `h1`, and a threshold on `h1` is again
+   one straight line in input space. That is exactly the limitation of a
+   single perceptron, so XOR cannot be solved (RMSD stays around 0.41).
+5. `h1` is high for every input except `(1,1)`: that is NAND. `h2` is
+   high only for `(0,0)`: that is NOR, the mirror image of the lecture's
+   OR unit (see the note in question 2).
+
+## Exercise 5
+
+```{r}
+parity_runs <- list()
+parity_final_losses <- numeric(10)
+for (seed in 1:10) {
+  parity_runs[[seed]] <- train_network(parity_data[, c("x1","x2","x3")], parity_data$category, n_hidden = 2, seed = seed)
+  parity_final_losses[seed] <- parity_runs[[seed]]$loss_history[2000]
+}
+best_parity <- parity_runs[[which.min(parity_final_losses)]]
+round(parity_final_losses, 4)
+best_parity$loss_history[2000]
+```
+
+The best parity run should end noticeably higher than XOR's best run
+(which is well under 0.1), and, more importantly, the *other* parity
+runs are mostly stuck at a much higher RMSD. With only 2 hidden units,
+most random starting points don't solve parity, even though a few lucky
+ones do -- Exercise 6 measures exactly how often.
+
+## Exercise 6
+
+```{r}
+single_run_success <- function(n_hidden, n_runs = 20) {
+  successes <- logical(n_runs)
+  for (s in 1:n_runs) {
+    fit <- train_network(parity_data[, c("x1","x2","x3")], parity_data$category,
+                         n_hidden = n_hidden, seed = s)
+    successes[s] <- fit$loss_history[2000] < 0.15
+  }
+  mean(successes)
+}
+
+single_run_success(n_hidden = 2)
+```
+
+With 2 hidden units only a **minority** of single runs succeed -- well
+under half of the 20 (the exact fraction depends on seeds 1 to 20). Most
+individual runs get stuck at an RMSD well above 0.15, which matches what
+you saw in Exercise 5, where only a few of the 10 final losses were low.
+So with 2 hidden units, parity is *possible* to learn, but a single run
+usually fails -- you only succeed if you restart enough times.
+
+## Exercise 7
+
+```{r}
+single_run_success(n_hidden = 4)
+single_run_success(n_hidden = 8)
+```
+
+With `n_hidden = 4` a large majority of single runs succeed, and with
+`n_hidden = 8` nearly all of them do. That's a much bigger jump than the
+restart-based version showed, because here we're measuring how reliable
+one run is rather than whether *some* restart eventually works. Going
+from 4 to 8 helps less than going from 2 to 4 -- more hidden units help,
+but with diminishing returns.
+
+## Exercise 8 (discussion)
+
+Yes -- 3-bit parity needs more hidden units than 2-bit XOR to train
+reliably. 2 hidden units solved XOR often enough that best-of-10 always
+worked (Exercise 4), but on parity a single run usually failed with 2
+hidden units (Exercise 6), while with 4 hidden units most single runs
+succeeded (Exercise 7). Following the "two lines, combined" picture:
+XOR's four points need 2 lines to separate correctly. Parity-3 has 8
+points instead of 4, arranged in a more complex pattern (a cube's
+corners, not a square's) -- so it's reasonable to guess it needs *more*
+than 2 lines to carve correctly, and the results back that up: 2 hidden
+units are right at the edge of being enough (they only get there with
+luck and restarts), while 4 is comfortably enough.
+
+## Exercise 9 (optional)
+
+```{r}
+fit_4hidden <- train_network(parity_data[, c("x1","x2","x3")], parity_data$category, n_hidden = 4, seed = 1)
+fit_4hidden$loss_history[2000]   # should be below 0.15; if not, try another seed
+round(fit_4hidden$W1, 2)
+round(fit_4hidden$b1, 2)
+```
+
+With seed 1 and 4 hidden units, the run solved parity (final RMSD about
+0.03), and the trained weights were:
+
+| unit | `x1` | `x2` | `x3` | bias |
+|------|-------|-------|-------|-------|
+| 1 | -3.90 | -1.79 | 3.12 | 1.08 |
+| 2 | -2.90 | 2.50 | -0.74 | 0.29 |
+| 3 | -6.69 | 6.41 | 6.63 | -3.19 |
+| 4 | 2.14 | 3.97 | 3.33 | -4.74 |
+
+The cleanest unit to read is **unit 4**. All three of its weights are
+positive and its bias is clearly negative (-4.74), so it only gets above
+0 when **at least two inputs are on**: with just one input on, the sum
+is at most 3.97 - 4.74 < 0 (output below 0.5), with two on it is
+between +0.7 and +2.6 (output about 0.67 to 0.93), and with all three on
+it is +4.7 (output 0.99). So unit 4 is roughly a "two or more inputs on"
+detector.
+
+**Unit 3** is also fairly readable: it is strongly positive for `x2` and
+`x3` (about +6.5 each), strongly negative for `x1` (-6.69), with bias
+-3.19. It fires (output above 0.9) for `(0,0,1)`, `(0,1,0)`, `(0,1,1)`
+and `(1,1,1)`, i.e. whenever `x2` or `x3` is on and `x1` is off (plus
+the all-ones pattern, where `x2` and `x3` together outweigh `x1`). It
+stays low (around 0.04 or lower) for `(0,0,0)`, `(1,0,0)`, `(1,0,1)` and
+`(1,1,0)`.
+
+Units 1 and 2 are messier: for example unit 1 has a negative weight on
+`x1` and `x2` and a positive one on `x3`, and gives intermediate outputs
+for several patterns. This is worth being honest about: unlike the
+lecture's clean, hand-picked OR/NAND example, a real hidden unit trained
+from a random start often learns a messier, harder-to-summarize rule, and
+the network as a whole solves parity by *combining* these partial
+features (some of them tidy, like "at least two inputs on", some not).
+That's a normal, expected outcome of training, not a sign anything went
+wrong. Your own numbers will differ with a different seed.
