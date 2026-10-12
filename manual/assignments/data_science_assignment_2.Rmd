@@ -1,0 +1,434 @@
+---
+title: "Assignment: Neural Networks -- Teaching a Network to Read Digits"
+output:
+  html_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+**Team members:** *(write your names here, up to 3)*
+
+## What you will do
+
+In the two Neural Networks lectures you trained a small network to solve XOR. Here you train the same kind of network on a bigger, real problem: reading **handwritten digits** (MNIST, digits 0 to 9). All code is given. It is the code you know, scaled up. Your job is to **run it, change things, and explain what you see** using the lectures and Data Science.
+
+**What is MNIST?** MNIST is a famous collection of 70,000 images of handwritten digits (0 to 9), written by many different people and widely used to test learning algorithms. Every image comes with its correct label. The data are split into two sets: **60,000 training digits**, which the network learns from, and **10,000 test digits**, which it never trains on. We train the network on the training digits but evaluate it on the test digits. That is the fair way to judge it: reading digits it has already seen could just mean it memorized them, while doing well on digits it has *not* seen yet shows that it has learned what digits look like. In the plots you will see the error on both sets.
+
+Write your answers under each question (replace *"Your answer here"*), knit to HTML, and submit the HTML and this `.Rmd`. Work in teams of up to 3. Put `mnist.Rdata` in the same folder as this file. One training run takes about 10 to 20 seconds, so run chunks one by one while you work.
+
+**What is from the lectures, what is new.** Almost everything is from the lectures: the sigmoid unit and `forward()`, the delta rule, passing the delta back to the hidden layer, updating with `lr * outer(delta, input)`, one example at a time, learning rate. The assignment scales this up to 784 pixel inputs and 10 outputs; *one-hot* targets (explained in Part 1) and the network's answer being the output unit with the largest value (`which.max()`); small random starting weights (`init_sd = 0.01` instead of 1); and the *error rate* (percentage of wrong digits), reported next to the RMSD you know from Supervised Learning, both measured on a random subset of digits. Other MNIST code often also uses ReLU units, mini-batches and weight normalization. We left these out; they are tricks to make training faster or more stable and you do not need them here.
+
+## Part 1: Look at the data
+
+First load the data. The file contains the 60,000 training digits and the 10,000 test digits, each as 784 pixel values (a 28 x 28 picture, one number per pixel) together with its target. We flip (transpose) the tables so that each row is one digit.
+
+```{r}
+load("mnist.Rdata")                 # loads four objects: traini, traino, testi, testo
+
+# In the file every column is one digit. We flip it (t = "transpose") so that every
+# ROW is one digit, like xor_data in the practicals.
+X_train <- t(traini)                # 60,000 rows (digits) x 784 pixel values
+Y_train <- t(traino)                # 60,000 rows x 10 target values (one-hot)
+X_test  <- t(testi)                 # 10,000 digits the network never trains on
+Y_test  <- t(testo)
+```
+
+This defines a small helper, `show_digit()`, that takes the 784 pixel values of one digit and draws them as a 28 x 28 grey-scale picture. You do not need to understand how it draws; you only use it to look at digits (and later at weights).
+
+```{r}
+show_digit <- function(X, i, main = "") {
+  im <- matrix(X[i, ], nrow = 28, byrow = TRUE)   # 784 numbers -> 28 x 28 grid of pixels
+  im <- im[, seq(ncol(im), 1, -1)]                # flip, so the digit is drawn upright
+  image(im, col = gray((0:255) / 255), axes = FALSE, asp = 1, main = main)
+}
+```
+
+Here are the first 10 training digits, drawn with `show_digit()`, each with its correct label. Handwriting differs a lot from person to person, which is what makes the task hard.
+
+```{r, fig.width = 10, fig.height = 4.5}
+par(mfrow = c(2, 5))                # 2 rows x 5 columns of pictures
+for (i in 1:10) {
+  show_digit(X_train, i, main = paste("label:", which.max(Y_train[i, ]) - 1))
+}
+par(mfrow = c(1, 1))
+```
+
+Every digit also comes with a **target**: what we want the network's 10 output units to say. There is one output unit per digit (0 to 9). The target has a 1 for the unit of the correct digit and a 0 for all the others. Because only one number is "hot" (1), this is called a *one-hot* target. For the first training digit above (a 5):
+
+```{r}
+Y_train[1, ]                        # the target: ten numbers, one per digit 0 to 9
+which.max(Y_train[1, ]) - 1         # the position of the 1 (minus 1, because we start at digit 0)
+```
+
+Training tries to make the 10 outputs equal to these 10 target numbers. The network's *answer* is the output unit with the largest value (`which.max()`).
+
+Finally, some numbers about the data: the size of the training table (digits x pixels), the range of the pixel values (0 is black, 1 is white), and how many training digits there are of each digit 0 to 9 (the loop turns each target back into the digit it stands for, and `table()` counts them). You need these numbers for Question 1.
+
+```{r}
+dim(X_train)
+range(X_train)
+train_labels <- numeric(nrow(Y_train))      # the digit (0 to 9) of every training example
+for (i in 1:nrow(Y_train)) {
+  train_labels[i] <- which.max(Y_train[i, ]) - 1
+}
+table(train_labels)
+```
+
+**Question 1.** How many pixels does a digit have, and how many training and test digits are there? What error rate would a network have if it guessed at random (the *chance level*)?
+
+> *Your answer here*
+
+## Part 2: The network and the training code
+
+The network has 784 inputs, one hidden layer of `n_hidden` sigmoid units and 10 sigmoid outputs. It is the XOR network of the lectures with more units; the only difference is that `W2` is now a matrix (one row per output unit) instead of a vector. The picture shows the network. Every line is one weight: each pixel is connected to **every** hidden unit, and each hidden unit has its **own separate weight to every one of the 10 output units**. (Only some pixels and hidden units are drawn; the real network has 784 and 30.)
+
+```{r, fig.width = 10, fig.height = 5}
+# Drawing code. Not examinable; you only need the picture.
+draw_network <- function(hidden = TRUE, n_hidden = 30) {
+  plot(NULL, xlim = c(0, 10), ylim = c(-1, 11), axes = FALSE, xlab = "", ylab = "")
+  y_in <- c(9, 8, 7, 6, 3.5, 2.5, 1.5)               # 7 of the 784 pixels (the gap means "and so on")
+  y_out <- seq(9.5, 0.5, length.out = 10)            # the 10 output units
+  if (hidden) {
+    y_hid <- c(9, 7.5, 6, 4, 2.5, 1)                 # 6 of the hidden units
+    for (a in y_in) for (b in y_hid) segments(1.5, a, 5, b, col = "grey80")
+    for (a in y_hid) for (b in y_out) segments(5, a, 8.5, b, col = "grey70")
+    points(rep(5, length(y_hid)), y_hid, pch = 21, bg = "orange", cex = 2.5)
+    text(5, 10.6, paste("hidden layer:", n_hidden, "units"), font = 2)
+    text(5, 5, "...", cex = 2)
+    text(3.2, -0.8, "W1: 784 x 30 weights", cex = 0.9)
+    text(6.8, -0.8, "W2: 30 x 10 weights", cex = 0.9)
+  } else {
+    for (a in y_in) for (b in y_out) segments(1.5, a, 8.5, b, col = "grey70")
+    text(5, -0.8, "W: 784 x 10 weights (no hidden layer)", cex = 0.9)
+  }
+  points(rep(1.5, length(y_in)), y_in, pch = 21, bg = "lightblue", cex = 2.5)
+  text(1.5, 5, "...", cex = 2)
+  text(1.5, 10.6, "input layer: 784 pixels", font = 2)
+  points(rep(8.5, 10), y_out, pch = 21, bg = "palegreen3", cex = 2.5)
+  text(9.3, y_out, 0:9)
+  text(8.5, 10.6, "output layer: 10 units", font = 2)
+}
+draw_network(hidden = TRUE)
+```
+
+These two functions are the network's forward pass. `sigmoid()` is the same unit as in the lectures. `forward_mnist()` is `forward()` from the XOR practical with more units: it turns the 784 pixels into the hidden unit activities `h`, and these into the 10 outputs.
+
+```{r}
+sigmoid <- function(x) {
+  1 / (1 + exp(-x))
+}
+forward_mnist <- function(x, W1, b1, W2, b2) {
+  h <- sigmoid(W1 %*% x + b1)          # hidden layer: same as the lecture, but now with 784 inputs
+  output <- sigmoid(W2 %*% h + b2)     # output layer: 10 units, one per digit
+  list(h = as.vector(h), output = as.vector(output))
+}
+```
+
+This is the training function. It is `train_network()` from the XOR practical, scaled up: it starts from small random weights, then repeatedly picks one random training digit, runs the forward pass, computes the deltas and updates the weights. Every `check_every` updates it also measures the error rate and the RMSD on a random subset of training digits and test digits, so that we can plot the learning curves. Read the part between `for (u in 1:n_updates)` and the updates carefully (Question 2); the rest is bookkeeping.
+
+```{r}
+train_mnist <- function(X, Y, X_test, Y_test, n_hidden, lr = 0.5, n_updates = 20000,
+                        seed = 1, init_sd = 0.01, check_every = 1000, n_check = 500) {
+  set.seed(seed)
+  n_inputs <- ncol(X)                  # 784 pixels
+  n_outputs <- ncol(Y)                 # 10 digits
+
+  W1 <- matrix(rnorm(n_hidden * n_inputs, sd = init_sd), nrow = n_hidden)
+  b1 <- rep(0, n_hidden)
+  W2 <- matrix(rnorm(n_outputs * n_hidden, sd = init_sd), nrow = n_outputs)
+  b2 <- rep(0, n_outputs)
+
+  n_checks <- floor(n_updates / check_every)
+  train_error <- numeric(n_checks)
+  test_error <- numeric(n_checks)
+  train_rmsd <- numeric(n_checks)
+  test_rmsd <- numeric(n_checks)
+
+  for (u in 1:n_updates) {
+    i <- sample(1:nrow(X), 1)                 # pick one random training digit
+    x <- X[i, ]
+    target <- Y[i, ]
+
+    fwd <- forward_mnist(x, W1, b1, W2, b2)
+    h <- fwd$h
+    output <- fwd$output
+
+    delta_out <- (target - output) * output * (1 - output)                  # one delta per output unit
+    delta_hidden <- as.vector(t(W2) %*% delta_out) * h * (1 - h)            # t() swaps rows and columns: each hidden unit collects blame from all 10 outputs
+
+    W2 <- W2 + lr * outer(delta_out, h)
+    b2 <- b2 + lr * delta_out
+    W1 <- W1 + lr * outer(delta_hidden, x)
+    b1 <- b1 + lr * delta_hidden
+
+    if (u %% check_every == 0) {              # every so often, measure the error rate and the RMSD
+      k <- u / check_every
+      for (set in 1:2) {
+        if (set == 1) { XX <- X; YY <- Y } else { XX <- X_test; YY <- Y_test }
+        idx <- sample(1:nrow(XX), min(n_check, nrow(XX)))   # a random subset of digits
+        wrong <- logical(length(idx))
+        sq <- numeric(length(idx))
+        for (j in 1:length(idx)) {
+          out <- forward_mnist(XX[idx[j], ], W1, b1, W2, b2)$output
+          wrong[j] <- which.max(out) != which.max(YY[idx[j], ])   # right or wrong?
+          sq[j] <- mean((out - YY[idx[j], ])^2)                    # squared error, averaged over the 10 outputs
+        }
+        if (set == 1) {
+          train_error[k] <- mean(wrong); train_rmsd[k] <- sqrt(mean(sq))
+        } else {
+          test_error[k] <- mean(wrong); test_rmsd[k] <- sqrt(mean(sq))
+        }
+      }
+    }
+  }
+  list(W1 = W1, b1 = b1, W2 = W2, b2 = b2,
+       updates = (1:n_checks) * check_every,
+       train_error = train_error, test_error = test_error,
+       train_rmsd = train_rmsd, test_rmsd = test_rmsd)
+}
+```
+
+**Question 2.** The training loop does the same steps as `train_network()` in the XOR practical. In your own words, what do the lines computing `delta_out` and `delta_hidden` do?
+
+> *Your answer here*
+
+## Part 3: Train the network
+
+```{r}
+fit <- train_mnist(X_train, Y_train, X_test, Y_test, n_hidden = 30, lr = 0.5,
+                   n_updates = 30000, seed = 1, check_every = 250, n_check = 500)
+```
+
+Before looking at the learning curves, look at what the network does with **one digit**, before and after training. The "before" network is the untrained starting network (small random weights, the same one `train_mnist()` starts from).
+
+```{r, fig.width = 10, fig.height = 4.5}
+set.seed(1)
+W1_0 <- matrix(rnorm(30 * 784, sd = 0.01), nrow = 30)   # the untrained network
+b1_0 <- rep(0, 30)
+W2_0 <- matrix(rnorm(10 * 30, sd = 0.01), nrow = 10)
+b2_0 <- rep(0, 10)
+
+j <- 1                                     # which test digit to look at (try other numbers too)
+target <- Y_test[j, ]
+before <- forward_mnist(X_test[j, ], W1_0, b1_0, W2_0, b2_0)$output
+after  <- forward_mnist(X_test[j, ], fit$W1, fit$b1, fit$W2, fit$b2)$output
+
+par(mfrow = c(1, 3))
+show_digit(X_test, j, main = paste("test digit", j))
+bars <- barplot(before, names.arg = 0:9, ylim = c(0, 1), col = "grey75",
+                xlab = "output unit (digit)", main = "outputs BEFORE training")
+points(bars, target, pch = 19, col = "red", cex = 1.5)          # red dots: the target
+bars <- barplot(after, names.arg = 0:9, ylim = c(0, 1), col = "steelblue",
+                xlab = "output unit (digit)", main = "outputs AFTER training")
+points(bars, target, pch = 19, col = "red", cex = 1.5)
+par(mfrow = c(1, 1))
+
+results <- rbind(target = target, before = before, after = after)
+colnames(results) <- 0:9
+round(results, 2)
+which.max(before) - 1                      # the network's answer before training
+which.max(after) - 1                       # the network's answer after training
+```
+
+**Question 3.** The red dots are the target for this digit, the bars are what the network outputs. What is the target, and what are the network's outputs and answer before and after training? Which numbers does training try to move, and in which direction? (The RMSD you will see below measures the distance between the bars and the red dots, averaged over digits.)
+
+> *Your answer here*
+
+Now the learning curves, measured on random digits from the training and test sets as training goes on:
+
+```{r, fig.width = 10, fig.height = 4.5}
+par(mfrow = c(1, 2))
+plot(fit$updates, fit$test_error, type = "o", col = "darkorange", lwd = 2,
+     ylim = c(0, 1), xlab = "number of updates (one digit per update)", ylab = "error rate")
+lines(fit$updates, fit$train_error, type = "o", col = "steelblue", lwd = 2)
+abline(h = 0.9, lty = 2)           # chance level: guessing at random gets 90% of digits wrong
+legend("right", legend = c("test digits", "training digits", "chance"),
+       col = c("darkorange", "steelblue", "black"), lty = c(1, 1, 2), lwd = 2)
+
+plot(fit$updates, fit$test_rmsd, type = "o", col = "darkorange", lwd = 2,
+     ylim = c(0, 0.6), xlab = "number of updates (one digit per update)", ylab = "RMSD")
+lines(fit$updates, fit$train_rmsd, type = "o", col = "steelblue", lwd = 2)
+par(mfrow = c(1, 1))
+round(fit$test_error[c(1, 4, 8, 12, 120)], 3)   # error rate after 250, 1000, 2000, 3000 and 30000 updates
+round(fit$test_rmsd[c(1, 4, 8, 12, 120)], 3)
+```
+
+The left panel shows the **error rate** (the percentage of digits where the largest output is the wrong one). The right panel shows the **RMSD** between the 10 outputs and the 10 one-hot target values, the same kind of discrepancy you used in Supervised Learning, and the quantity the delta rule actually reduces.
+
+**Question 4.** What are the error rate and the RMSD at the end, and how quickly did the network get there? Both start high: why? Could the RMSD go down while the error rate stays the same? (Think of the correct output unit moving from 0.3 to 0.4 while another unit is still larger.)
+
+> *Your answer here*
+
+## Part 4: Do we need a hidden layer?
+
+In Neural Networks 1 a single layer of units could not solve XOR. Does MNIST need a hidden layer? The function below trains **10 perceptrons** (one per digit, each looking at all 784 pixels, no hidden layer) with exactly the delta rule from Neural Networks 1. The picture shows this network: no hidden layer, every pixel connected directly to every output unit.
+
+```{r, fig.width = 10, fig.height = 5}
+draw_network(hidden = FALSE)
+```
+
+This function does the same as `train_mnist()` but without the hidden layer: 10 output units that each look directly at the 784 pixels. Note that there is only a `delta_out` and no `delta_hidden`. It records the error rate and the RMSD on test digits.
+
+```{r}
+train_perceptrons <- function(X, Y, X_test, Y_test, lr = 0.5, n_updates = 30000,
+                              seed = 1, init_sd = 0.01, check_every = 3000, n_check = 1000) {
+  set.seed(seed)
+  n_inputs <- ncol(X)
+  n_outputs <- ncol(Y)
+
+  W <- matrix(rnorm(n_outputs * n_inputs, sd = init_sd), nrow = n_outputs)  # 10 perceptrons, 784 weights each
+  b <- rep(0, n_outputs)
+
+  n_checks <- floor(n_updates / check_every)
+  test_error <- numeric(n_checks)
+  test_rmsd <- numeric(n_checks)
+
+  for (u in 1:n_updates) {
+    i <- sample(1:nrow(X), 1)
+    x <- X[i, ]
+    target <- Y[i, ]
+
+    output <- as.vector(sigmoid(W %*% x + b))
+    delta_out <- (target - output) * output * (1 - output)    # exactly the delta rule from Neural Networks 1
+
+    W <- W + lr * outer(delta_out, x)
+    b <- b + lr * delta_out
+
+    if (u %% check_every == 0) {
+      idx <- sample(1:nrow(X_test), n_check)
+      wrong <- logical(n_check)
+      sq <- numeric(n_check)
+      for (j in 1:n_check) {
+        out <- as.vector(sigmoid(W %*% X_test[idx[j], ] + b))
+        wrong[j] <- which.max(out) != which.max(Y_test[idx[j], ])
+        sq[j] <- mean((out - Y_test[idx[j], ])^2)
+      }
+      test_error[u / check_every] <- mean(wrong)
+      test_rmsd[u / check_every] <- sqrt(mean(sq))
+    }
+  }
+  list(W = W, b = b, updates = (1:n_checks) * check_every,
+       test_error = test_error, test_rmsd = test_rmsd)
+}
+```
+
+Now train the 10 perceptrons (this takes a while) and plot their test error rate and test RMSD (green) against those of the network with 30 hidden units (orange) from Part 3.
+
+```{r, fig.width = 10, fig.height = 4.5}
+fit_perc <- train_perceptrons(X_train, Y_train, X_test, Y_test, seed = 1, check_every = 250, n_check = 500)
+
+par(mfrow = c(1, 2))
+plot(fit$updates, fit$test_error, type = "o", col = "darkorange", lwd = 2,
+     ylim = c(0, 0.5), xlab = "number of updates", ylab = "test error rate")
+lines(fit_perc$updates, fit_perc$test_error, type = "o", col = "darkgreen", lwd = 2)
+legend("topright", legend = c("30 hidden units", "no hidden layer"),
+       col = c("darkorange", "darkgreen"), lwd = 2, lty = 1)
+
+plot(fit$updates, fit$test_rmsd, type = "o", col = "darkorange", lwd = 2,
+     ylim = c(0, 0.5), xlab = "number of updates", ylab = "test RMSD")
+lines(fit_perc$updates, fit_perc$test_rmsd, type = "o", col = "darkgreen", lwd = 2)
+par(mfrow = c(1, 1))
+```
+
+**Question 5.** Compare the two networks at the end, in error rate and in RMSD (each point is measured on 1000 random digits, so tiny differences are not meaningful). A network without a hidden layer could never solve XOR, yet here it reads digits fairly well. How can both be true, and what does the hidden layer add here?
+
+> *Your answer here*
+
+## Part 5: One experiment (choose A or B)
+
+Do **one** of A or B (you may do both). Answer Question 6 for the one you chose.
+
+**A. How many hidden units?**
+
+This loop trains a separate network for each number of hidden units (2, 10, 30 and 100), keeps only the final test error rate of each, and plots it against the number of hidden units. It takes a minute or two.
+
+```{r}
+hidden_sizes <- c(2, 10, 30, 100)
+final_test_error <- numeric(length(hidden_sizes))
+for (k in 1:length(hidden_sizes)) {
+  f <- train_mnist(X_train, Y_train, X_test, Y_test, n_hidden = hidden_sizes[k],
+                   n_updates = 30000, seed = 1, check_every = 30000, n_check = 2000)
+  final_test_error[k] <- f$test_error[1]
+}
+plot(hidden_sizes, final_test_error, type = "b", log = "x", pch = 19, ylim = c(0, 1),
+     xlab = "number of hidden units (log scale)", ylab = "test error rate")
+round(final_test_error, 3)
+```
+
+**B. The learning rate**
+
+This loop trains a separate network for each learning rate (from very small to very large), keeps only the final test error rate of each, and plots it against the learning rate. It takes a minute or two.
+
+```{r}
+learning_rates <- c(0.01, 0.1, 0.5, 2, 10)
+final_test_error_lr <- numeric(length(learning_rates))
+for (k in 1:length(learning_rates)) {
+  f <- train_mnist(X_train, Y_train, X_test, Y_test, n_hidden = 30, lr = learning_rates[k],
+                   n_updates = 30000, seed = 1, check_every = 30000, n_check = 2000)
+  final_test_error_lr[k] <- f$test_error[1]
+}
+plot(learning_rates, final_test_error_lr, type = "b", log = "x", pch = 19, ylim = c(0, 1),
+     xlab = "learning rate (log scale)", ylab = "test error rate")
+round(final_test_error_lr, 3)
+```
+
+**Question 6.** Describe your result and explain it with ideas from the lectures. For **A**: what happens with only 2 hidden units and why (think of the XOR and parity practical), and what do you gain from more units, and at what cost? For **B**: what happens when the learning rate is too small or too large (think of the step size in the dart-throwing story)?
+
+> *Your answer here*
+
+## Part 6: Overfitting
+
+What if the network only had 200 digits to learn from? Here we train on only the first 200 training digits, but test on all test digits:
+
+```{r}
+fit_small <- train_mnist(X_train[1:200, ], Y_train[1:200, ], X_test, Y_test,
+                         n_hidden = 30, lr = 0.5, n_updates = 60000, seed = 1,
+                         check_every = 5000, n_check = 200)
+
+plot(fit_small$updates, fit_small$test_error, type = "o", col = "darkorange", lwd = 2,
+     ylim = c(0, 0.5), xlab = "number of updates", ylab = "error rate")
+lines(fit_small$updates, fit_small$train_error, type = "o", col = "steelblue", lwd = 2)
+legend("topright", legend = c("test digits", "training digits"),
+       col = c("darkorange", "steelblue"), lwd = 2, lty = 1)
+```
+
+**Question 7.** Describe the training and test error. What is happening, why is this called overfitting, and why did it not happen in Part 3 (60,000 digits)? Name one way to reduce the problem.
+
+> *Your answer here*
+
+## Part 7: What did the network learn?
+
+Here the trained network from Part 3 classifies the first 2000 test digits. The table counts, for every true digit (rows), which digit the network answered (columns). Numbers on the diagonal are correct answers; numbers off the diagonal are mistakes, so the large off-diagonal numbers show which digits get confused. The last line is the overall error rate on these 2000 digits.
+
+```{r}
+# classify the first 2000 test digits with the network from Part 3
+n_show <- 2000
+predicted <- numeric(n_show)
+actual <- numeric(n_show)
+for (j in 1:n_show) {
+  out <- forward_mnist(X_test[j, ], fit$W1, fit$b1, fit$W2, fit$b2)$output
+  predicted[j] <- which.max(out) - 1
+  actual[j] <- which.max(Y_test[j, ]) - 1
+}
+table(actual, predicted)             # rows: the true digit, columns: the network's answer
+mean(predicted != actual)
+```
+
+Each hidden unit has 784 incoming weights, one per pixel. Drawn as a 28 x 28 picture (with `show_digit()`), the weights show which pixels excite the unit (bright) and which inhibit it (dark), that is, what the unit "looks at". Here are the first 10 of the 30 hidden units.
+
+```{r, fig.width = 10, fig.height = 4.5}
+# what does each hidden unit "look at"? Every hidden unit has 784 incoming weights,
+# one per pixel. Drawn as a picture, they show which pixels excite (bright) or inhibit (dark) it.
+par(mfrow = c(2, 5))
+for (k in 1:10) {
+  show_digit(fit$W1, k, main = paste("hidden unit", k))
+}
+par(mfrow = c(1, 1))
+```
+
+**Question 8.** Which two digits does the network confuse most often, and does that make sense? Describe what one hidden unit seems to respond to in the weight pictures (compare Exercise 9 of the XOR/parity practical, where each hidden unit drew one line).
+
+> *Your answer here*

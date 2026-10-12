@@ -160,7 +160,8 @@ cat("</br>")
 The assignments are group assignments. Please form subgroups of two or three students. Every **group** has to do **one** assignment of their choice and submit it via Canvas at the **end of this block**. The assignments are not graded, but they are mandatory to pass the course.
 
 * [Assignment 1: Parameter Estimation](assignments/data_science_assignment_1.Rmd) ([download](rmd/data_science_assignment_1.Rmd))
-* Assignment 2: Neural Networks (will appear after the lecture on Neural Networks)
+* [Assignment 2: Neural Networks](assignments/data_science_assignment_1.Rmd)
+([download](rmd/data_science_assignment_2.Rmd))
 
 <!--
 **Solutions**
