@@ -6,10 +6,12 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(warning = FALSE, eval = file.exists("mnist.Rdata"))   # run the code only if the data file is present
 ```
 
 **Team members:** *(write your names here, up to 3)*
+
+`r if (!file.exists("mnist.Rdata")) "> **mnist.Rdata not found.** Students: download it from Canvas (Modules > Datasets), put it in the same folder as this file and knit again. Until then the code below is shown but not run."`
 
 ## What you will do
 
