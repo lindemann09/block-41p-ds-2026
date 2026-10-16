@@ -167,3 +167,8 @@ The assignments are group assignments. Please form subgroups of two or three stu
 **Solutions**
 
 -->
+
+
+# Information about the Exam
+
+* [Practice Exam Questions](practice_exam_2026.Rmd)
