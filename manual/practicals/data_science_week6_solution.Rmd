@@ -1,5 +1,5 @@
 ---
-title: "Practical 5: Neural Networks 2 -- Solutions"
+title: "Practical 6: Neural Networks 2 -- Solutions"
 output:
   html_document:
     toc: true

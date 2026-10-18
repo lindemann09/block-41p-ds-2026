@@ -1,5 +1,5 @@
 ---
-title: "Week 4: Supervised Learning -- Solutions"
+title: "Week 3: Supervised Learning -- Solutions"
 output:
   html_document:
     toc: true

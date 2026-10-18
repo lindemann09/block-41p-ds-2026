@@ -1,5 +1,5 @@
 ---
-title: "Week 3: Resampling & Monte Carlo Methods"
+title: "Week 4: Resampling & Monte Carlo Methods"
 subtitle: "How Randomness can help us Understand the World"
 output:
   html_document:

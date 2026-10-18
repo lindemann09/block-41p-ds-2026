@@ -1,5 +1,5 @@
 ---
-title: "Practical 5: Neural Networks 2"
+title: "Practical 6: Neural Networks 2"
 subtitle: "How Many Hidden Units Do You Actually Need?"
 output:
   html_document:

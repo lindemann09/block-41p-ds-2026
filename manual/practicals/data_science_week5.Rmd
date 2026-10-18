@@ -1,5 +1,5 @@
 ---
-title: "Week 4: Neural Networks 1"
+title: "Week 5: Neural Networks 1"
 subtitle: "Exploring the Perceptron and the Delta Rule"
 output:
   html_document:
