@@ -21,8 +21,10 @@
     - Prince, S. J. D. (2023). Shallow neural networks. In [Understanding Deep Learning](https://udlbook.github.io/udlbook/) (pp. 25–40). MIT Press.
 6.  **Neural Networks 2**
     - Section 13.2 (backpropogation) of Farrell & Lewadowsky (2018)
-
-*The list is not complete and will be updated during the course.*
+7. **Multinomial Processing Tree (MPT) Models**
+    - *maximum likelihood estimation*: see Chapter 4 of Farrell & Lewandowsky (2018), pages: 72 - 103.
+    - Schmidt, O., Erdfelder, E., & Heck, D. W. (2025). How to develop, test, and extend multinomial processing tree models: A tutorial. *Psychological Methods*, 30(4), 720–743. https://doi.org/10.1037/met0000561
+    - Erdfelder, E., Auer, T.-S., Hilbig, B. E., Aßfalg, A., Moshagen, M., & Nadarevic, L. (2009). Multinomial processing tree models: A review of the literature. *Zeitschrift für Psychologie/Journal of Psychology*, 217(3), 108–124. doi: 10.1027/0044-3409.217.3.108, [download](https://www.researchgate.net/publication/220032645_Multinomial_processing_tree_models_A_review_of_the_literature)
 
 The links above point to the online resources of the literature. Books and articles that are not listed here can be downloaded from the Canvas page.
 
@@ -38,4 +40,3 @@ Please note that some of the references are only accessible from the university 
   - [Gradient descent, how neural networks learn \| Deep learning chapter 2](https://www.youtube.com/watch?v=IHZwWFHWa-w)
   - [What is backpropagation really doing? \| Deep learning chapter 3](https://www.youtube.com/watch?v=Ilg3gGewQ5U)
 
-*The list is not complete and will be updated during the course.*
