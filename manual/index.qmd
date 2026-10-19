@@ -23,7 +23,7 @@ This online course manual that contains all instructions and the important study
 #| echo: false
 
 # linked materials
-visible_practicals = 6
+visible_practicals = 7
 visible_solutions = 5
 visible_lectures = 6
 
