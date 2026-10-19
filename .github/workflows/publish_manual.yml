@@ -37,6 +37,7 @@ jobs:
             any::afex
             any::webexercises
             any::praise
+            any::mpt
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
