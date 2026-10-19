@@ -1,6 +1,6 @@
 ---
 title: "Week 7: Multinomial Processing Tree Models"
-subtitle: "How Randomness can help us Understand the World"
+subtitle: "Maximum Likelihood Estimation & Theoretical Models in Cognitive Psychology"
 output:
   html_document:
     toc: true
@@ -20,10 +20,14 @@ This exercise requires the package/library `mpt`. You need to install the librar
 
 `install.packages("mpt")`
 
-## Maximum Likelihood Estimation
+## Model of Children's Counting Skills and Maximum Likelihood Estimation
 
+In this first part, we use a simple model of children's counting skills to get a better understanding on
 
-### Exercise 1: Number estimation experiment
+1. how  maximum likelihood estimation (MLE) works
+2. how we can use MLE to test mathematical models of psychological hypotheses
+
+## Exercise 1: Number estimation experiment
 
 We tested 10 children in the age of 6 years and asked them to count an array of dots. The arrays contained between 2 and 20 dots. The children were about 6 years old.
 
@@ -293,11 +297,16 @@ The AIC and BIC of the first model were smaller than the AIC/BIC of the second m
 
 ## Multinomial Processing Tree Models
 
-### Experiment by Riefer & Batchelder (1988)
+**Experiment by Riefer & Batchelder (1988)**
 
-The experiment by Riefer & Batchelder (1988) is a classic example of a memory experiment. In this experiment, participants were presented with a list of words and were later asked to write down all the words they remembered (free recall). The researchers were interested in understanding the cognitive processes involved in memory retrieval. (see the slides 33pp of lecture 7).
+Riefer, D. M., & Batchelder, W. H. (1988). Multinomial modeling and the measurement of cognitive processes. *Psychological Review*, 95(3), 318–339.
 
-The remembered words and their order of recall can be categorized  as follows:
+
+This experiment is a classic example of the use of statistical/mathematical models a memory research. Participants were presented with a list of words and were later asked to write down all the words they remembered (free recall).
+
+The researchers were interested in understanding the cognitive processes involved in memory retrieval. (see the slides 33pp of lecture 7). The theory assumes that some words are not stored in memory as single items, but as pairs of semantically related words (e.g., "aunt – uncle").
+
+The remembered words and their order in the free recall can be categorized  as follows:
 
 * *Category pairs*
   * **E1** Pair is recalled adjacently ("aunt – uncle")
@@ -446,7 +455,7 @@ summary(md_fit2)
 
 ### Exercise 13: Likelihood ratio test
 
-If you run a likelihood ratio test, you can compare the restricted model to the unrestricted model. To do use we use the  _R_-function `anova()`. See:
+If you run a likelihood ratio test, you can compare the restricted model to the unrestricted model. To do so, we use the  _R_-function `anova()`. See:
 
 ```{r}
 anova(md_fit2, md_fit1)  ## likelihood ratio test (order is important!)
