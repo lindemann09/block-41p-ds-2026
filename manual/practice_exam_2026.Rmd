@@ -23,10 +23,10 @@ answered question.
 questions are open questions and might required multiple steps/answers to solve. You can
 therefore get sometimes more than one point. Partial points are possibles.
 
-The final grade of the exam will be based 
+The final grade of the exam will be based
 
-* $5/6$ on the theoretical MC questions and 
-* $1/6$ on the practical open questions.
+* 80% ($4/5$) on the theoretical MC questions and
+* 20% ($1/5$) on the practical open questions.
 
 --------------------
 
