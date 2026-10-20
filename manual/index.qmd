@@ -24,7 +24,7 @@ This online course manual that contains all instructions and the important study
 
 # linked materials
 visible_practicals = 7
-visible_solutions = 5
+visible_solutions = 7
 visible_lectures = 6
 
 # practical_title = c(
