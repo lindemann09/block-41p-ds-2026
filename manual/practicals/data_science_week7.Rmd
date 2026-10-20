@@ -20,6 +20,11 @@ This exercise requires the package/library `mpt`. You need to install the librar
 
 `install.packages("mpt")`
 
+*The package `mpt` is not available for old R versions (< 4.3). If you cannot install the package,
+please update first your R version. ([Windows](https://cran.r-project.org/bin/windows/base/),
+[MacOS](https://cran.r-project.org/bin/macosx/))*
+
+
 ## Model of Children's Counting Skills and Maximum Likelihood Estimation
 
 In this first part, we use a simple model of children's counting skills to get a better understanding on

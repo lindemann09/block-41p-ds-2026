@@ -25,8 +25,8 @@ therefore get sometimes more than one point. Partial points are possibles.
 
 The final grade of the exam will be based
 
-* 80% ($4/5$) on the theoretical MC questions and
-* 20% ($1/5$) on the practical open questions.
+* 80% on the theoretical MC questions and
+* 20% on the practical open questions.
 
 --------------------
 
