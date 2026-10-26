@@ -290,7 +290,7 @@ C: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
   the hidden delta, then the weight update. Distractor a is the order of
   operations in the backward pass, but it omits the forward pass; c and
   d are just wrong.
-- **Q9**: D
+- **Q9**: B
 - **Q10**: A
 - **Q11**: if (score >= 55)
 - **Q12**: 33 - adding second and thrid value of the vector
